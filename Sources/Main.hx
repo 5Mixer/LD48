@@ -35,7 +35,7 @@ class Main {
 
 	function render(framebuffer: Framebuffer) {
 		var g = framebuffer.g2;
-		g.begin(true,kha.Color.fromValue(0xead2a1));
+		g.begin(true,kha.Color.fromValue(0x0d1219));
 		graphics.setG2(g);
 		simulation.render(graphics);
 
