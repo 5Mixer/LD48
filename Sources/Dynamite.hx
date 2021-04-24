@@ -1,6 +1,5 @@
 package ;
 
-import kha.Scheduler;
 import nape.phys.Body;
 import nape.phys.BodyType;
 import nape.shape.Polygon;
@@ -19,7 +18,8 @@ class Dynamite {
         body.shapes.add(new Polygon(Polygon.box(10,20)));
         body.position.setxy(x, y);
         body.setShapeMaterials(nape.phys.Material.glass());
-        body.angularVel = Math.random()-.5;
+        body.angularVel = Math.random()*2-1;
+        body.rotation = Math.PI * 2 * Math.random();
         body.space = space;
     }
     public function render(g:Graphics) {

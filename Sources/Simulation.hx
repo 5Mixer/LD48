@@ -8,6 +8,10 @@ class Simulation {
     var grid:Grid;
     var dynamite:Array<Dynamite> = [];
     var launchers:Array<Launcher> = [];
+    var explosions = new ParticleSystem();
+
+    public var money = 0;
+    public var mineralValues = [0, 5, 10, 30, 50];
  
     public function new() {
         var gravity = Vec2.weak(0, 600);
@@ -35,15 +39,22 @@ class Simulation {
 
     function explosion(x,y,force) {
         var explosionOrigin = Vec2.get(x*20, 600 + y*20);
+
+        explosions.explode(explosionOrigin.x,explosionOrigin.y,force);
         
         for (localx in Math.floor(-force/2)...Math.ceil(force/2)) {
             for (localy in Math.floor(-force/2)...Math.ceil(force/2)) {
-                if (Math.abs(localx)+Math.abs(localy) < force)
+                if (Math.abs(localx)+Math.abs(localy) < force) {
+                    
+                    var tile = grid.getTile(x+localx, y+localy);
+                    money += mineralValues[tile];
+                    
                     grid.remove(x + localx,y + localy);
+                }
             }
         }
 
-        var explosionForceEffect = 20;
+        var explosionForceEffect = 40;
 
         for (body in space.bodiesInCircle(explosionOrigin, force * 20)) {
             var deltaVector = body.position.sub(explosionOrigin);
@@ -73,6 +84,7 @@ class Simulation {
             launcher.update(delta);
         }
         grid.update();
+        explosions.update(delta);
     }
     public function render(g:Graphics) {
         grid.render(g);
@@ -82,5 +94,6 @@ class Simulation {
         for (launcher in launchers) {
             launcher.render(g);
         }
+        explosions.render(g);
     }
 }

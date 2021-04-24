@@ -19,4 +19,9 @@ class Graphics {
     public function drawTile(x:Float,y:Float, tile) {
         g.drawScaledSubImage(kha.Assets.images.tile, tile*20, 0, 20, 20, x, y, 20, 20);
     }
+    public function drawParticle(x:Float, y:Float, life:Float,size:Float) {
+        g.color = kha.Assets.images.explosion_gradient.at(Math.floor(life*100),0);
+        g.fillCircle(x, y, size*Math.abs(1.1-life));
+        g.color = kha.Color.White;
+    }
 }

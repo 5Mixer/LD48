@@ -13,10 +13,10 @@ class Main {
 	var lastTime = Scheduler.time();
 	function new() {
 
-		graphics = new Graphics();
-
 		System.start({title: "LD48", width: 800, height: 600}, function (_) {
 			Assets.loadEverything(function () {
+
+				graphics = new Graphics();
 
 				lastTime = Scheduler.time();
 
@@ -44,6 +44,9 @@ class Main {
 		g.begin(true,kha.Color.fromValue(0x0d1219));
 		graphics.setG2(g);
 		simulation.render(graphics);
+		g.fontSize = 50;
+		g.font = kha.Assets.fonts.BebasNeue_Regular;
+		g.drawString("$"+simulation.money, 100, 100);
 
 		g.end();
 	}
