@@ -13,7 +13,7 @@ class Dynamite {
     public function new(x:Float, y:Float, space:Space, explodeCallback:(Dynamite)->Void) {
         body = new Body(BodyType.DYNAMIC);
 
-        timer = 2500 + Math.random() * 2000;
+        timer = 1.5 + Math.random() * 1.5;
         this.explodeCallback = explodeCallback;
 
         body.shapes.add(new Polygon(Polygon.box(10,20)));
@@ -28,8 +28,8 @@ class Dynamite {
     public function getPosition() {
         return body.position;
     }
-    public function update() {
-        timer -= Scheduler.time();
+    public function update(delta:Float) {
+        timer -= delta;
         if (timer <= 0) {
             explode();
         }

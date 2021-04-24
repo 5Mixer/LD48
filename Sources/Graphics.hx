@@ -16,4 +16,7 @@ class Graphics {
         g.drawScaledImage(image, x, y, width, height);
         if (angle != 0) g.popTransformation();
     }
+    public function drawTile(x:Float,y:Float, tile) {
+        g.drawScaledSubImage(kha.Assets.images.tile, tile*20, 0, 20, 20, x, y, 20, 20);
+    }
 }

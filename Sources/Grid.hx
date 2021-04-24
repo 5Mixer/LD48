@@ -7,7 +7,7 @@ import nape.shape.Polygon;
 
 class Grid {
     var width = 150;
-    var height = 60;
+    var height = 400;
 
     var tiles:Array<Int> = [];
     var bodies:Array<Body> = [];
@@ -16,7 +16,16 @@ class Grid {
     public function new(space) {
         for (x in 0...width) {
             for (y in 0...height) {
-                tiles.push(1);
+                var tile = 1;
+                var r = Math.random();
+                if (r < .05) {
+                    tile = 2;
+                }else if (r < .1) {
+                    tile = 3;
+                }else if (r < .15) {
+                    tile = 4;
+                }
+                tiles.push(tile);
                 bodies.push(null);
             }
         }
@@ -29,8 +38,8 @@ class Grid {
     public function render(g:Graphics){
         for (x in 0...width) {
             for (y in 0...height) {
-                if (tiles[x*height+y] == 1) {
-                    g.drawImage(kha.Assets.images.tile, x*20, y*20+600, 20, 20);
+                if (tiles[x*height+y] != 0) {
+                    g.drawTile(x*20, y*20+600, tiles[x*height+y]-1);
                 }
             }
         }
@@ -52,40 +61,38 @@ class Grid {
             bodies[x*height+y] = null;
         }
 
-        if (x > 0 && unsafeGetTile(x-1,y) == 1 && getBody(x-1,y) == null) {
+        if (x > 0 && unsafeGetTile(x-1,y) != 0 && unsafeGetBody(x-1,y) == null) {
             makeBody(x-1,y);
         }
-        if (x < width-1 && unsafeGetTile(x+1,y) == 1 && getBody(x+1,y) == null) {
+        if (x < width-1 && unsafeGetTile(x+1,y) != 0 && unsafeGetBody(x+1,y) == null) {
             makeBody(x+1,y);
         }
-        if (y > 0 && unsafeGetTile(x,y-1) == 1 && getBody(x,y-1) == null) {
+        if (y > 0 && unsafeGetTile(x,y-1) != 0 && unsafeGetBody(x,y-1) == null) {
             makeBody(x,y-1);
         }
-        if (y < height-1 && unsafeGetTile(x,y+1) == 1 && getBody(x,y+1) == null) {
+        if (y < height-1 && unsafeGetTile(x,y+1) != 0 && unsafeGetBody(x,y+1) == null) {
             makeBody(x,y+1);
         }
     }
     public inline function unsafeGetTile(x,y) {
         return tiles[x*height+y];
     }
-    public function getTile(x,y) {
-        if (x < 0 || y < 0 || x >= width || y >= height)
-            return 0;
-        return tiles[x*height+y];
-    }
-    public inline function getBody(x,y) {
-        // if (x < 0 || y < 0 || x >= width || y >= height)
-        //     return null;
+    public inline function unsafeGetBody(x,y) {
         return bodies[x*height+y];
     }
 
     public function constructShapes() {
         for (x in 0...width) {
             for (y in 0...height) {
-                if (getTile(x,y) == 1 && (getTile(x-1,y) == 0 || getTile(x+1,y) == 0 || getTile(x,y-1) == 0 || getTile(x,y+1) == 0)) {
+                if (getTile(x,y) != 0 && (getTile(x-1,y) == 0 || getTile(x+1,y) == 0 || getTile(x,y-1) == 0 || getTile(x,y+1) == 0)) {
                     makeBody(x,y);
                 }
             }
         }
+    }
+    public function getTile(x,y) {
+        if (x < 0 || y < 0 || x >= width || y >= height)
+            return 0;
+        return tiles[x*height+y];
     }
 }

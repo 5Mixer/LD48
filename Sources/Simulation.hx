@@ -30,11 +30,21 @@ class Simulation {
     }
 
     function explosion(x,y,force) {
+        var explosionOrigin = Vec2.get(x*20, 600 + y*20);
+        
         for (localx in Math.floor(-force/2)...Math.ceil(force/2)) {
             for (localy in Math.floor(-force/2)...Math.ceil(force/2)) {
                 if (Math.abs(localx)+Math.abs(localy) < force)
                     grid.remove(x + localx,y + localy);
             }
+        }
+
+        var explosionForceEffect = 20;
+
+        for (body in space.bodiesInCircle(explosionOrigin, force * 20)) {
+            var deltaVector = body.position.sub(explosionOrigin);
+            deltaVector.length = explosionForceEffect * force*20/deltaVector.length;
+            body.applyImpulse(deltaVector);
         }
     }
 
@@ -43,11 +53,11 @@ class Simulation {
         dynamite.remove(explodedDynamite);
     }
 
-    public function update() {
+    public function update(delta:Float) {
         space.step(1/60);
 
         for (dynamite in dynamite) {
-            dynamite.update();
+            dynamite.update(delta);
         }
         grid.update();
     }
