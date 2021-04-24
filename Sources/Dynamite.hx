@@ -7,7 +7,7 @@ import nape.shape.Polygon;
 import nape.space.Space;
 
 class Dynamite {
-    var body:Body;
+    public var body:Body;
     var timer:Float;
     var explodeCallback:(Dynamite)->Void;
     public function new(x:Float, y:Float, space:Space, explodeCallback:(Dynamite)->Void) {

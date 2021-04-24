@@ -7,6 +7,7 @@ class Simulation {
     var space:Space;
     var grid:Grid;
     var dynamite:Array<Dynamite> = [];
+    var launchers:Array<Launcher> = [];
  
     public function new() {
         var gravity = Vec2.weak(0, 600);
@@ -24,8 +25,11 @@ class Simulation {
         
         grid = new Grid(space);
 
-        for (i in 0...400) {
-            dynamite.push(new Dynamite(i%70*20,Math.floor(i/70)*20, space, dynamiteExplosion));
+        for (i in 0...100) {
+            // dynamite.push(new Dynamite(i%70*20,Math.floor(i/70)*20, space, dynamiteExplosion));
+        }
+        for (i in 0...5) {
+            launchers.push(new Launcher(100+i*40, 600, launcherCallback));
         }
     }
 
@@ -48,6 +52,12 @@ class Simulation {
         }
     }
 
+    function launcherCallback(launcher:Launcher) {
+        var newDynamite = new Dynamite(launcher.position.x, launcher.position.y, space, dynamiteExplosion);
+        newDynamite.body.applyImpulse(Vec2.weak(300,-200));
+        dynamite.push(newDynamite);
+    }
+
     public function dynamiteExplosion(explodedDynamite:Dynamite) {
         explosion(Math.round(explodedDynamite.getPosition().x/20), Math.round((explodedDynamite.getPosition().y-600)/20), 5);
         dynamite.remove(explodedDynamite);
@@ -59,12 +69,18 @@ class Simulation {
         for (dynamite in dynamite) {
             dynamite.update(delta);
         }
+        for (launcher in launchers) {
+            launcher.update(delta);
+        }
         grid.update();
     }
     public function render(g:Graphics) {
         grid.render(g);
         for (dynamite in dynamite) {
             dynamite.render(g);
+        }
+        for (launcher in launchers) {
+            launcher.render(g);
         }
     }
 }

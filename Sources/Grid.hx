@@ -18,11 +18,11 @@ class Grid {
             for (y in 0...height) {
                 var tile = 1;
                 var r = Math.random();
-                if (r < .05) {
+                if (r < .01) {
                     tile = 2;
-                }else if (r < .1) {
+                }else if (r < .02) {
                     tile = 3;
-                }else if (r < .15) {
+                }else if (r < .03) {
                     tile = 4;
                 }
                 tiles.push(tile);
