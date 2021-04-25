@@ -1,5 +1,8 @@
 package;
 
+import kha.graphics5_.MipMapFilter;
+import kha.graphics4.MipMapFilter;
+import kha.graphics2.ImageScaleQuality;
 import kha.input.Mouse;
 import kha.input.Keyboard;
 import kha.Assets;
@@ -15,6 +18,9 @@ class Main {
 
 		System.start({title: "LD48", width: 800, height: 600}, function (_) {
 			Assets.loadEverything(function () {
+				for (asset in kha.Assets.images.names) {
+					kha.Assets.images.get(asset).generateMipmaps(8);
+				}
 
 				graphics = new Graphics();
 
@@ -28,10 +34,10 @@ class Main {
 	}
 	function init() {
 		simulation = new Simulation();
-		Mouse.get().notify(function(b,x,y){
-			if (b == 0)
-				simulation.initialise();
-		},null,null);
+		// Mouse.get().notify(function(b,x,y){
+		// 	if (b == 0)
+		// 		simulation.initialise();
+		// },null,null);
 
 	}
 
@@ -42,6 +48,9 @@ class Main {
 
 	function render(framebuffer: Framebuffer) {
 		var g = framebuffer.g2;
+		g.imageScaleQuality = ImageScaleQuality.High;
+		g.mipmapScaleQuality = ImageScaleQuality.High;
+
 		g.begin(true,kha.Color.fromValue(0x0d1219));
 		graphics.setG2(g);
         simulation.camera.transform(g);

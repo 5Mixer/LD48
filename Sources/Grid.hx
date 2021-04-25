@@ -36,13 +36,35 @@ class Grid {
     public function update() {
     }
     public function render(g:Graphics){
+        g.startTiles();
         for (x in 0...width) {
             for (y in 0...height) {
-                if (tiles[x*height+y] != 0) {
-                    g.drawTile(x*20, y*20+600, tiles[x*height+y]-1);
+                if (getTile(x,y) != 0) {
+                    g.drawTile(x*20, y*20+600, getTile(x,y)-1);
+
+                    if (getTile(x,y-1) == 0) {
+                        g.drawTile(x*20, y*20+600, 8);
+                    }
+                    if (getTile(x,y+1) == 0) {
+                        g.drawTile(x*20, y*20+600, 9);
+                    }
+
+                    if (getTile(x,y+1) == 0 && getTile(x-1,y) == 0) {
+                        g.drawTile(x*20, y*20+600, 4);
+                    }
+                    if (getTile(x,y-1) == 0 && getTile(x-1,y) == 0) {
+                        g.drawTile(x*20, y*20+600, 5);
+                    }
+                    if (getTile(x,y-1) == 0 && getTile(x+1,y) == 0) {
+                        g.drawTile(x*20, y*20+600, 6);
+                    }
+                    if (getTile(x,y+1) == 0 && getTile(x+1,y) == 0) {
+                        g.drawTile(x*20, y*20+600, 7);
+                    }
                 }
             }
         }
+        g.endTiles();
     }
     function makeBody(x, y) {
         var body = new Body(BodyType.STATIC);

@@ -1,5 +1,6 @@
 package ;
 
+import kha.math.Vector2;
 import kha.audio1.Audio;
 import nape.geom.Vec2;
 import nape.space.Space;
@@ -7,6 +8,9 @@ import nape.space.Space;
 class Simulation {
     var space:Space;
     var grid:Grid;
+
+    var player:Player;
+
     var dynamite:Array<Dynamite> = [];
     var launchers:Array<Launcher> = [];
     var explosions = new ParticleSystem();
@@ -18,6 +22,8 @@ class Simulation {
     public var mineralValues = [0, 5, 10, 30, 50];
 
     var audioChannels = [];
+
+    var reload = 0.;
  
     public function new() {
         var gravity = Vec2.weak(0, 600);
@@ -40,7 +46,11 @@ class Simulation {
 				camera.zoomOn(input.getMouseScreenPosition(), delta);
 			// }
 		}
- 
+
+        input.onLeftDown = function() {
+            // Audio.play(kha.Assets.sounds.takeoff);
+        }
+
         initialise();
     }
  
@@ -59,6 +69,8 @@ class Simulation {
         for (i in 0...5) {
             launchers.push(new Launcher(100+i*40, 600, launcherCallback));
         }
+
+        player = new Player(600, 540, space);
     }
 
     function explosion(x,y,force:Float, vx=0., vy=0.) {
@@ -115,6 +127,10 @@ class Simulation {
     public function update(delta:Float) {
         space.step(1/60);
 
+        reload -= delta;
+
+        camera.position.y = player.getPosition().y - kha.Window.get(0).height/2;
+
         for (audioChannel in audioChannels) {
             if (audioChannel.finished)
                 audioChannels.remove(audioChannel);
@@ -126,17 +142,34 @@ class Simulation {
         for (launcher in launchers) {
             launcher.update(delta);
         }
+
+        if (input.rightMouseButtonDown && reload <= 0.) {
+            var vector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
+            var d = new Dynamite(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space, dynamiteExplosion);
+            var speed = 600;
+            d.body.velocity.x = vector.x * speed;
+            d.body.velocity.y = vector.y * speed;
+            dynamite.push(d);
+
+            var fireSound = kha.audio1.Audio.play(kha.Assets.sounds.fire);
+            fireSound.volume = .3 + Math.random() * .1;
+
+            reload = .1;
+        }
+
+        player.update(delta, input);
         grid.update();
         explosions.update(delta);
     }
     public function render(g:Graphics) {
+        explosions.render(g);
         grid.render(g);
+        player.render(g);
         for (dynamite in dynamite) {
             dynamite.render(g);
         }
         for (launcher in launchers) {
             launcher.render(g);
         }
-        explosions.render(g);
     }
 }
