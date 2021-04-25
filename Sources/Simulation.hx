@@ -1,5 +1,8 @@
 package ;
 
+import kha.audio1.AudioChannel;
+import nape.dynamics.InteractionFilter;
+import nape.geom.Ray;
 import kha.math.Vector2;
 import kha.audio1.Audio;
 import nape.geom.Vec2;
@@ -22,6 +25,7 @@ class Simulation {
     public var mineralValues = [0, 5, 10, 30, 50];
 
     var audioChannels = [];
+    var laserSound:AudioChannel;
 
     var reload = 0.;
  
@@ -33,10 +37,10 @@ class Simulation {
         input = new Input(camera);
 
         input.onMouseMove = function(dx,dy) {
-			if (input.middleMouseButtonDown) {
-				camera.position.x -= dx;
-				camera.position.y -= dy;
-			}
+			// if (input.middleMouseButtonDown) {
+			// 	camera.position.x -= dx;
+			// 	camera.position.y -= dy;
+			// }
 		};
 		input.onScroll = function(delta) {
             // camera.position.y += delta * 60;
@@ -50,6 +54,9 @@ class Simulation {
         input.onLeftDown = function() {
             // Audio.play(kha.Assets.sounds.takeoff);
         }
+
+        laserSound = Audio.play(kha.Assets.sounds.laser, true);
+        laserSound.volume = 0;
 
         initialise();
     }
@@ -125,12 +132,20 @@ class Simulation {
         dynamite.remove(explodedDynamite);
     }
 
+    var rayDistance = 0.;
     public function update(delta:Float) {
         space.step(1/60);
 
         reload -= delta;
 
-        camera.position.y = player.getPosition().y - kha.Window.get(0).height/2;
+        var directionVector = Vec2.get(input.getMouseWorldPosition().x, input.getMouseWorldPosition().y).sub(player.body.position).muleq(1000);
+        var ray = space.rayCast(Ray.fromSegment(player.body.position, player.body.position.add(directionVector, true)));
+        if (ray != null)
+            rayDistance = ray.distance;
+        else
+            rayDistance = 6000;
+
+        camera.position.y = player.getPosition().y*camera.scale - kha.Window.get(0).height/2;
 
         for (audioChannel in audioChannels) {
             if (audioChannel.finished)
@@ -158,6 +173,30 @@ class Simulation {
             reload = .1;
         }
 
+        if (input.middleMouseButtonDown) {
+            laserSound.volume = 1;
+
+            if (ray != null) {
+                // trace(ray);
+                if (ray.shape != null && ray.shape.body != null && ray.shape.body.userData != null && ray.shape.body.userData.data != null) {
+                    
+                    switch (cast(ray.shape.body.userData.data, BodyData)) {
+                        case Tile(x,y): {
+                            grid.damage(x,y, 100);
+                        }
+                        case Dynamite(laserDynamite): {
+                            laserDynamite.explode();
+                        }
+                    }
+
+                }
+            }
+        }else{
+            laserSound.volume *= .6;
+        }
+
+        // ray.dispose();
+
         player.update(delta, input);
         grid.update();
         explosions.update(delta);
@@ -165,7 +204,16 @@ class Simulation {
     public function render(g:Graphics) {
         explosions.render(g);
         grid.render(g);
+
+        if (input.middleMouseButtonDown) {
+            g.drawLaser(player.body.position.x, player.body.position.y, Math.atan2(input.getMouseWorldPosition().y-player.body.position.y, input.getMouseWorldPosition().x-player.body.position.x), rayDistance);
+        }
+
         player.render(g);
+
+        var turretVector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
+        g.drawImage(kha.Assets.images.laser_attachment, player.body.position.x-40, player.body.position.y-40, 80, 80, Math.atan2(turretVector.y, turretVector.x));
+
         for (dynamite in dynamite) {
             dynamite.render(g);
         }

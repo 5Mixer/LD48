@@ -79,6 +79,7 @@ class Grid {
     }
     function makeBody(x, y) {
         var body = new Body(BodyType.STATIC);
+        body.userData.data = BodyData.Tile(x,y);
         body.shapes.add(new Polygon(Polygon.rect(x*20, 600+y*20, 20, 20)));
         body.space = space;
 

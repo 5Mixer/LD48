@@ -12,7 +12,7 @@ class Dynamite {
     public function new(x:Float, y:Float, space:Space, explodeCallback:(Dynamite)->Void) {
         body = new Body(BodyType.DYNAMIC);
 
-        timer = 2 + Math.random() * .05;
+        timer = 8 + Math.random() * .05;
         this.explodeCallback = explodeCallback;
 
         body.shapes.add(new Polygon(Polygon.box(10,20)));
@@ -20,6 +20,7 @@ class Dynamite {
         body.setShapeMaterials(nape.phys.Material.glass());
         body.angularVel = Math.random()*2-1;
         body.rotation = Math.PI * 2 * Math.random();
+        body.userData.data = BodyData.Dynamite(this);
         body.space = space;
     }
     public function render(g:Graphics) {
@@ -35,7 +36,7 @@ class Dynamite {
         }
     }
 
-    function explode() {
+    public function explode() {
         body.space = null;
         explodeCallback(this);
     }

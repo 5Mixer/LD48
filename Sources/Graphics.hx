@@ -24,6 +24,14 @@ class Graphics {
         g.fillCircle(x, y, size*Math.abs(1.1-life));
         g.color = kha.Color.White;
     }
+    public function drawLaser(x, y, angle, distance:Float) {
+        g.drawLine(x,y, x+Math.cos(angle) * distance, y+Math.sin(angle) * distance);
+        var width = 10;
+
+        g.pushTransformation(g.transformation.multmat(FastMatrix3.translation(x, y)).multmat(FastMatrix3.rotation(angle)).multmat(FastMatrix3.translation(-x, -y)));
+        g.drawScaledImage(kha.Assets.images.laser, x, y-width/2, distance, 10);
+        g.popTransformation();
+    } 
     public function startTiles() {
         g.mipmapScaleQuality = Low;
         g.imageScaleQuality = Low;
