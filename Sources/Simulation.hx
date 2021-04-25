@@ -82,12 +82,13 @@ class Simulation {
         
         for (localx in Math.floor(-force/2)...Math.ceil(force/2)) {
             for (localy in Math.floor(-force/2)...Math.ceil(force/2)) {
-                if (Math.pow(localx,2)+Math.pow(localy,2) < forceSquared) {
+                var distanceSquared = Math.pow(localx,2)+Math.pow(localy,2);
+                if (distanceSquared < forceSquared) {
                     
                     var tile = grid.getTile(x+localx, y+localy);
                     money += mineralValues[tile];
                     
-                    grid.remove(x + localx,y + localy);
+                    grid.damage(x + localx,y + localy, Math.ceil(50 * (1-distanceSquared/forceSquared)));
                 }
             }
         }

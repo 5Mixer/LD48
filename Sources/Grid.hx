@@ -10,6 +10,7 @@ class Grid {
     var height = 400;
 
     var tiles:Array<Int> = [];
+    var tileHealth:Array<Int> = [];
     var bodies:Array<Body> = [];
     var space:Space;
 
@@ -17,14 +18,24 @@ class Grid {
         for (x in 0...width) {
             for (y in 0...height) {
                 var tile = 1;
+                var health = 10;
+
                 var r = Math.random();
                 if (r < .01) {
                     tile = 2;
+                    health = 20; 
                 }else if (r < .02) {
                     tile = 3;
+
+                    health = 50; 
                 }else if (r < .03) {
                     tile = 4;
+                    health = 80; 
                 }
+
+                health = Math.round(health * .5 + Math.random() * health * .5);
+
+                tileHealth.push(health);
                 tiles.push(tile);
                 bodies.push(null);
             }
@@ -72,6 +83,11 @@ class Grid {
         body.space = space;
 
         bodies[x*height+y] = body;
+    }
+    public function damage(x,y,damage) {
+        tileHealth[x*height+y] -= damage;
+        if (tileHealth[x*height+y] <= 0)
+            remove(x,y);
     }
     public function remove(x,y) {
         if (x < 0 || y < 0 || x >= width || y >= height)
