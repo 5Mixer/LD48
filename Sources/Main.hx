@@ -1,5 +1,6 @@
 package;
 
+import kha.audio1.Audio;
 import kha.graphics5_.MipMapFilter;
 import kha.graphics4.MipMapFilter;
 import kha.graphics2.ImageScaleQuality;
@@ -16,6 +17,7 @@ class Main {
 	var lastTime = Scheduler.time();
     var buttons = [];
 	var buttony = 60;
+	var upgradeCosts = [ 1000, 100, 100];
 	function new() {
 
 		System.start({title: "LD48", width: 800, height: 600}, function (_) {
@@ -38,15 +40,43 @@ class Main {
 		simulation = new Simulation();
 		buttons = [];
 
-		buttons.push(new Button(200, buttony, "Buy Laser", simulation.input, function() {
-			simulation.laserPurchase();
-		}));
-		buttons.push(new Button(650, buttony, "Upgrade Dynamite Speed", simulation.input, function() {
-			simulation.dynamiteSpeedPurchase();
-		}));
-		buttons.push(new Button(1100, buttony, "Upgrade Dynamite Force", simulation.input, function() {
-			simulation.dynamiteForcePurchase();
-		}));
+		var laserButton:Button, speedButton:Button, forceButton:Button = null;
+
+		laserButton = new Button(200, buttony, "Buy Laser", simulation.input, function() {
+			if (simulation.money > upgradeCosts[0]) {
+				simulation.laserPurchase();
+				simulation.money -= upgradeCosts[0];
+				upgradeCosts[0] *= 2;
+                Audio.play(kha.Assets.sounds.button);
+			}
+			laserButton.mouseOverText = "$"+upgradeCosts[0];
+		});
+		buttons.push(laserButton);
+		laserButton.mouseOverText = "$"+upgradeCosts[0];
+
+		speedButton = new Button(650, buttony, "Upgrade Dynamite Speed", simulation.input, function() {
+			if (simulation.money > upgradeCosts[1]) {
+				simulation.dynamiteSpeedPurchase();
+				simulation.money -= upgradeCosts[1];
+				upgradeCosts[1] *= 2;
+                Audio.play(kha.Assets.sounds.button);
+			}
+			speedButton.mouseOverText = "$"+upgradeCosts[1];
+		});
+		buttons.push(speedButton);
+		speedButton.mouseOverText = "$"+upgradeCosts[1];
+
+		forceButton = new Button(1100, buttony, "Upgrade Dynamite Force", simulation.input, function() {
+			if (simulation.money > upgradeCosts[2]) {
+				simulation.dynamiteForcePurchase();
+				simulation.money -= upgradeCosts[2];
+				upgradeCosts[2] *= 2;
+                Audio.play(kha.Assets.sounds.button);
+			}
+			forceButton.mouseOverText = "$"+upgradeCosts[2];
+		});
+		buttons.push(forceButton);
+		forceButton.mouseOverText = "$"+upgradeCosts[2];
 	}
 
 	function update() {

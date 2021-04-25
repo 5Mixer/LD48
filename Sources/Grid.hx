@@ -15,6 +15,7 @@ class Grid {
     var tileHealth:Array<Int> = [];
     var bodies:Array<Body> = [];
     var space:Space;
+    public var tileRemovalCallback:Int->Void;
 
     public function new(space) {
         var m_diamondSquare = new Perlin();//width, height, 64, 2, function() { return Math.random() - .5; });
@@ -110,6 +111,8 @@ class Grid {
     public function remove(x,y) {
         if (x < 0 || y < 0 || x >= width || y >= height)
             return;
+
+        tileRemovalCallback(tiles[x*height+y]);
         tiles[x*height+y] = 0;
 
         if (bodies[x*height+y] != null) {

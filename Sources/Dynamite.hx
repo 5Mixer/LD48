@@ -12,7 +12,7 @@ class Dynamite {
     public function new(x:Float, y:Float, space:Space, explodeCallback:(Dynamite)->Void) {
         body = new Body(BodyType.DYNAMIC);
 
-        timer = 8 + Math.random() * .05;
+        timer = 2 + Math.random() * .5;
         this.explodeCallback = explodeCallback;
 
         body.shapes.add(new Polygon(Polygon.box(10,20)));

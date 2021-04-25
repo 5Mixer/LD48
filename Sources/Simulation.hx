@@ -1,5 +1,8 @@
 package ;
 
+import nape.shape.Polygon;
+import nape.phys.BodyType;
+import nape.phys.Body;
 import kha.audio1.AudioChannel;
 import nape.geom.Ray;
 import kha.math.Vector2;
@@ -23,7 +26,7 @@ class Simulation {
     public var money = 0;
     public var mineralValues = [0, 5, 10, 30, 50, 150];
     
-    var audioChannels = [];
+    var audioChannels:Array<AudioChannel> = [];
     var laserSound:AudioChannel;
     
     var reload = 0.;
@@ -42,7 +45,6 @@ class Simulation {
         
         input.onScroll = function(delta) {
             camera.zoomOn(camera.worldToView(new Vector2(player.body.position.x,player.body.position.y)), delta);
-            // camera.scale += delta*.1;
         }
         
         laserSound = Audio.play(kha.Assets.sounds.laser, true);
@@ -57,11 +59,16 @@ class Simulation {
         
         dynamite = [];
         space.clear();
+
+        var walls = new Body(BodyType.STATIC);
+        walls.shapes.add(new Polygon(Polygon.rect(-100,-10000, 100, 1000000)));
+        walls.shapes.add(new Polygon(Polygon.rect(3000,-10000, 100, 1000000)));
+        walls.space = space;
         
         grid = new Grid(space);
-        
-        for (i in 0...5) {
-            launchers.push(new Launcher(100+i*40, 600, launcherCallback));
+
+        grid.tileRemovalCallback = function(tile) {
+            money += mineralValues[tile];
         }
         
         player = new Player(600, 540, space);
@@ -78,10 +85,6 @@ class Simulation {
             for (localy in Math.floor(-force/2)...Math.ceil(force/2)) {
                 var distanceSquared = Math.pow(localx,2)+Math.pow(localy,2);
                 if (distanceSquared < forceSquared) {
-                    
-                    var tile = grid.getTile(x+localx, y+localy);
-                    money += mineralValues[tile];
-                    
                     grid.damage(x + localx,y + localy, Math.ceil(50 * (1-distanceSquared/forceSquared)));
                 }
             }
@@ -123,7 +126,7 @@ class Simulation {
         }
         audioChannels.push(Audio.play(kha.Assets.sounds.get('explosion'+(1+Math.floor(Math.random()*6)))));
         
-        explosion(Math.round(explodedDynamite.getPosition().x/20), Math.round((explodedDynamite.getPosition().y-600)/20), dynamiteForce * (.8 +Math.random() * .4), movementVector.x, movementVector.y);
+        explosion(Math.round(explodedDynamite.getPosition().x/20), Math.round((explodedDynamite.getPosition().y-600)/20), 2+dynamiteForce * (.8 +Math.random() * .4), movementVector.x, movementVector.y);
         dynamite.remove(explodedDynamite);
     }
     
@@ -136,15 +139,16 @@ class Simulation {
         
         var directionVector = Vec2.get(input.getMouseWorldPosition().x, input.getMouseWorldPosition().y).sub(player.body.position).muleq(1000);
         var ray = space.rayCast(Ray.fromSegment(player.body.position, player.body.position.add(directionVector, true)));
-        if (ray != null)
+        if (ray != null) {
             rayDistance = ray.distance;
-        else
+        }else{
             rayDistance = 6000;
-        
+        }
         
         for (audioChannel in audioChannels) {
-            if (audioChannel.finished)
+            if (audioChannel.finished) {
                 audioChannels.remove(audioChannel);
+            }
         }
         
         for (dynamite in dynamite) {
@@ -165,7 +169,7 @@ class Simulation {
             var fireSound = kha.audio1.Audio.play(kha.Assets.sounds.fire);
             fireSound.volume = .3 + Math.random() * .1;
             
-            reload = 2 / dynamiteSpeed;
+            reload = 1.3 / dynamiteSpeed;
         }
         
         if (input.middleMouseButtonDown) {
@@ -173,16 +177,14 @@ class Simulation {
             
             if (ray != null) {
                 if (ray.shape != null && ray.shape.body != null && ray.shape.body.userData != null && ray.shape.body.userData.data != null) {
-                    
                     switch (cast(ray.shape.body.userData.data, BodyData)) {
                         case Tile(x,y): {
-                            grid.damage(x,y, 5);
+                            grid.damage(x,y, 5 + 5 * laserLevel);
                         }
                         case Dynamite(laserDynamite): {
                             laserDynamite.explode();
                         }
                     }
-                    
                 }
             }
         }else{
