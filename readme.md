@@ -1,4 +1,4 @@
-## LD48
+## LD48 - Play at https://5mixer.itch.io/orbdig
 An entry into Ludum Dare 48, theme: 'deeper and deeper'. Gameplay is digging deeper and deeper through fun explosions and lasers!
 
 Made in 17 hours (streamed and recorded!) with:
