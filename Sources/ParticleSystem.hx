@@ -14,8 +14,8 @@ class ParticleSystem {
         particles.push(newParticle);
         return newParticle;
     }
-    public function explode(x,y,force,vx,vy) {
-        for (i in 0...50) {
+    public function explode(x,y,particleCount,vx,vy) {
+        for (i in 0...particleCount) {
             var angle = Math.PI * 2 * Math.random();
             var speed = 4+Math.random() * 16;
             var p = getParticle();

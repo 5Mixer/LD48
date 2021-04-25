@@ -83,7 +83,7 @@ class Simulation {
     function explosion(x,y,force:Float, vx=0., vy=0.) {
         var explosionOrigin = Vec2.get(x*20, 600 + y*20);
 
-        explosions.explode(explosionOrigin.x,explosionOrigin.y,force,vx,vy);
+        explosions.explode(explosionOrigin.x,explosionOrigin.y, 90, vx,vy);
 
         var forceSquared = force*force/4;
         
@@ -121,14 +121,12 @@ class Simulation {
             movementVector.length = Math.min(5, 2 + movementVector.length/50);
         }
 
-        var force = 4+Math.random()*4;
-
         if (audioChannels.length > 5) {
             audioChannels.shift().stop();
         }
         audioChannels.push(Audio.play(kha.Assets.sounds.get('explosion'+(1+Math.floor(Math.random()*6)))));
 
-        explosion(Math.round(explodedDynamite.getPosition().x/20), Math.round((explodedDynamite.getPosition().y-600)/20), force, movementVector.x, movementVector.y);
+        explosion(Math.round(explodedDynamite.getPosition().x/20), Math.round((explodedDynamite.getPosition().y-600)/20), 4 + Math.round(Math.random()*3), movementVector.x, movementVector.y);
         dynamite.remove(explodedDynamite);
     }
 
@@ -177,7 +175,6 @@ class Simulation {
             laserSound.volume = 1;
 
             if (ray != null) {
-                // trace(ray);
                 if (ray.shape != null && ray.shape.body != null && ray.shape.body.userData != null && ray.shape.body.userData.data != null) {
                     
                     switch (cast(ray.shape.body.userData.data, BodyData)) {
@@ -195,13 +192,16 @@ class Simulation {
             laserSound.volume *= .6;
         }
 
-        // ray.dispose();
-
         player.update(delta, input);
         grid.update();
         explosions.update(delta);
     }
     public function render(g:Graphics) {
+        g.g.color = kha.Color.fromValue(0xffb4d8f5);
+        g.g.fillRect(0, -10000, kha.Window.get(0).width, 10100);
+        g.g.color = kha.Color.White;
+
+        g.drawImage(kha.Assets.images.background, 0, 600-594, kha.Window.get(0).width, 594);
         explosions.render(g);
         grid.render(g);
 
@@ -213,6 +213,14 @@ class Simulation {
 
         var turretVector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
         g.drawImage(kha.Assets.images.laser_attachment, player.body.position.x-40, player.body.position.y-40, 80, 80, Math.atan2(turretVector.y, turretVector.x));
+
+        if (input.leftMouseButtonDown)
+            g.drawImage(kha.Assets.images.jet_attachment, player.body.position.x-40, player.body.position.y-40, 80, 80, Math.PI+Math.atan2(turretVector.y, turretVector.x));
+
+        if (input.leftMouseButtonDown && player.body.velocity.length > 1) {
+            var jetVector = turretVector.mult(-20);
+            explosions.explode(player.body.position.x,player.body.position.y, 10, jetVector.x, jetVector.y);
+        }
 
         for (dynamite in dynamite) {
             dynamite.render(g);

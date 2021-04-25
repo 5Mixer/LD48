@@ -4,7 +4,7 @@ import kha.math.FastMatrix3;
 using kha.graphics2.GraphicsExtension;
 
 class Graphics {
-    var g:kha.graphics2.Graphics;
+    public var g:kha.graphics2.Graphics;
     public function new() {
 
     }
