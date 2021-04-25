@@ -24,7 +24,7 @@ class Simulation {
     public var input:Input;
     
     public var money = 0;
-    public var mineralValues = [0, 5, 10, 30, 50, 150];
+    public var mineralValues = [0, 5, 10, 30, 50, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150]; // Yes, the tiles are out of order. Yes, this is probably the worst code I've ever written.
     
     var audioChannels:Array<AudioChannel> = [];
     var laserSound:AudioChannel;

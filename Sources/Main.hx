@@ -1,5 +1,6 @@
 package;
 
+import js.html.EventListener;
 import kha.audio1.Audio;
 import kha.graphics2.ImageScaleQuality;
 import kha.Assets;
@@ -18,6 +19,13 @@ class Main {
 	function new() {
 
 		System.start({title: "LD48", width: 800, height: 600}, function (_) {
+			#if js
+			var canvas = cast(js.Browser.document.getElementById('khanvas'), js.html.CanvasElement);
+			canvas.width = js.Browser.window.innerWidth;
+			canvas.height = js.Browser.window.innerHeight;
+			canvas.addEventListener('contextmenu', function(event){ event.preventDefault();}); 
+			#end
+
 			Assets.loadEverything(function () {
 				for (asset in kha.Assets.images.names) {
 					kha.Assets.images.get(asset).generateMipmaps(8);
@@ -97,6 +105,12 @@ class Main {
 	}
 
 	function update() {
+		#if js
+		var canvas = cast(js.Browser.document.getElementById('khanvas'), js.html.CanvasElement);
+		canvas.width = js.Browser.window.innerWidth;
+		canvas.height = js.Browser.window.innerHeight;      
+		#end
+
 		simulation.update(Scheduler.time() - lastTime);
 		lastTime = Scheduler.time();
 	}

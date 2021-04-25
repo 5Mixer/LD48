@@ -1,4 +1,4 @@
-let project = new Project('Marblerun');
+let project = new Project('LD48');
 
 project.addSources('Sources');
 project.addLibrary('nape');
