@@ -13,7 +13,7 @@ class Input {
     public var rightMouseButtonDown = false;
     public var onRightDown:()->Void;
     public var onRightUp:()->Void;
-    public var onLeftDown:()->Void;
+    public var onLeftDown:Array<()->Void> = [];
     public var onMouseMove:(Int,Int)->Void;
     public var onScroll:(Int)->Void;
 
@@ -32,7 +32,8 @@ class Input {
         if (button == 0){
             leftMouseButtonDown = true;
             if (onLeftDown != null)
-                onLeftDown();
+                for (callback in onLeftDown)
+                    callback();
         }
         if (button == 1){
             rightMouseButtonDown = true;

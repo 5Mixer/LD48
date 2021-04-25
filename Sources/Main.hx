@@ -14,6 +14,8 @@ class Main {
 	var simulation:Simulation;
 	var graphics:Graphics;
 	var lastTime = Scheduler.time();
+    var buttons = [];
+	var buttony = 60;
 	function new() {
 
 		System.start({title: "LD48", width: 800, height: 600}, function (_) {
@@ -34,11 +36,17 @@ class Main {
 	}
 	function init() {
 		simulation = new Simulation();
-		// Mouse.get().notify(function(b,x,y){
-		// 	if (b == 0)
-		// 		simulation.initialise();
-		// },null,null);
+		buttons = [];
 
+		buttons.push(new Button(200, buttony, "Buy Laser", simulation.input, function() {
+			simulation.laserPurchase();
+		}));
+		buttons.push(new Button(650, buttony, "Upgrade Dynamite Speed", simulation.input, function() {
+			simulation.dynamiteSpeedPurchase();
+		}));
+		buttons.push(new Button(1100, buttony, "Upgrade Dynamite Force", simulation.input, function() {
+			simulation.dynamiteForcePurchase();
+		}));
 	}
 
 	function update() {
@@ -58,7 +66,11 @@ class Main {
 		simulation.camera.reset(g);
 		g.fontSize = 50;
 		g.font = kha.Assets.fonts.BebasNeue_Regular;
-		g.drawString("$"+simulation.money, 100, 100);
+		g.drawString("$"+simulation.money, buttony, 100);
+
+        for (button in buttons) {
+            button.render(graphics);
+        }
 
 		g.end();
 	}

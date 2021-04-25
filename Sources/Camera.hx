@@ -8,6 +8,7 @@ class Camera {
 	public var position:Vector2;
 	public var scale:Float;
 	var zoomSpeed = 1.09;
+	var worldWidth = 3000;
 
 	public function new () {
 		position = new Vector2();
@@ -20,9 +21,17 @@ class Camera {
 		} else {
 			scale /= amount * zoomSpeed;
 		} 
-		scale = Math.max(0.5, Math.min(5, scale));
+		scale = Math.max(0.5, scale);
+		scale = Math.min(2, scale);
+		// scale = Math.max(scale, kha.Window.get(0).width/worldWidth);
 		var newWorldPos = viewToWorld(screenPoint);
 		position = position.add(worldToView(oldWorldPos).sub(worldToView(newWorldPos)));
+	}
+	public function follow(x:Float,y:Float) {
+		scale = Math.max(scale, kha.Window.get(0).width/worldWidth);
+		position.x = scale*x-kha.Window.get(0).width/2;
+		position.y = scale*y-kha.Window.get(0).height/2;
+		position.x = Math.max(0, Math.min(position.x, scale*worldWidth - kha.Window.get(0).width));
 	}
 	public function worldToView(point:Vector2) {
 		return point.mult(scale).sub(position);
