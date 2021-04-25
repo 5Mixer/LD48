@@ -14,7 +14,7 @@ class Player {
     var visualRotation = 0.;
     var lastBodyRotation = 0.;
 
-    var flyingSound:AudioChannel;
+    public var flyingSound:AudioChannel;
     var flyingVolume = .3;
 
     public function new(x:Float, y:Float, space:Space) {

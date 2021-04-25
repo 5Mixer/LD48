@@ -19,17 +19,18 @@ class Grid {
 
     public function new(space) {
         var m_diamondSquare = new Perlin();//width, height, 64, 2, function() { return Math.random() - .5; });
+        var seed = Math.random() * 100000;
 
         for (x in 0...width) {
             for (y in 0...height) {
                 var tile = 1;
                 var health = 10;
 
-                var air = m_diamondSquare.OctavePerlin(x/20, y/20 , 0, 4, 0.5, 0.6);
-                var mineralA = m_diamondSquare.OctavePerlin(x/12 + 1000, y/3 , 0, 3, 0.5, 0.25);
-                var mineralB = m_diamondSquare.OctavePerlin(x/5  + 2000,  y/4 , 100, 3, 0.5, 0.25);
-                var mineralC = m_diamondSquare.OctavePerlin(x/2  + 3000,  y/2 , 200, 3, 0.5, 0.25);
-                var mineralD = m_diamondSquare.OctavePerlin(x  + 8000,  y , 300, 3, 0.5, 0.25);
+                var air = m_diamondSquare.OctavePerlin(x/20, y/20 , seed, 4, 0.5, 0.6);
+                var mineralA = m_diamondSquare.OctavePerlin(x/12 + 1000, y/3 , seed, 3, 0.5, 0.25);
+                var mineralB = m_diamondSquare.OctavePerlin(x/5  + 2000,  y/4 , seed, 3, 0.5, 0.25);
+                var mineralC = m_diamondSquare.OctavePerlin(x/2  + 3000,  y/2 , seed, 3, 0.5, 0.25);
+                var mineralD = m_diamondSquare.OctavePerlin(x  + 8000,  y , seed, 3, 0.5, 0.25);
                 if (mineralA < .4) {
                     tile = 2;
                     health = 20; 

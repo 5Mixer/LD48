@@ -32,9 +32,9 @@ class Simulation {
     var reload = 0.;
     var rayDistance = 0.;
 
-    var dynamiteForce = 1;
-    var dynamiteSpeed = 1;
-    var laserLevel = 1;
+    public var dynamiteForce = 1;
+    public var dynamiteSpeed = 1;
+    public var laserLevel = 1;
     
     public function new() {
         var gravity = Vec2.weak(0, 600);
@@ -97,6 +97,13 @@ class Simulation {
             deltaVector.length = explosionForceEffect * force*20/deltaVector.length;
             body.applyImpulse(deltaVector);
         }
+    }
+
+    public function stop() {
+        laserSound.stop();
+        player.flyingSound.stop();
+        for (channel in audioChannels)
+            channel.stop();
     }
 
     public function laserPurchase() {
@@ -179,7 +186,7 @@ class Simulation {
                 if (ray.shape != null && ray.shape.body != null && ray.shape.body.userData != null && ray.shape.body.userData.data != null) {
                     switch (cast(ray.shape.body.userData.data, BodyData)) {
                         case Tile(x,y): {
-                            grid.damage(x,y, 5 + 5 * laserLevel);
+                            grid.damage(x,y, 1 + 2 * laserLevel);
                         }
                         case Dynamite(laserDynamite): {
                             laserDynamite.explode();

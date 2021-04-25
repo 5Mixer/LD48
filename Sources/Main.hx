@@ -1,11 +1,7 @@
 package;
 
 import kha.audio1.Audio;
-import kha.graphics5_.MipMapFilter;
-import kha.graphics4.MipMapFilter;
 import kha.graphics2.ImageScaleQuality;
-import kha.input.Mouse;
-import kha.input.Keyboard;
 import kha.Assets;
 import kha.Framebuffer;
 import kha.Scheduler;
@@ -40,7 +36,7 @@ class Main {
 		simulation = new Simulation();
 		buttons = [];
 
-		var laserButton:Button, speedButton:Button, forceButton:Button = null;
+		var laserButton:Button, speedButton:Button, forceButton:Button, mineButton:Button = null;
 
 		laserButton = new Button(200, buttony, "Buy Laser", simulation.input, function() {
 			if (simulation.money > upgradeCosts[0]) {
@@ -77,6 +73,23 @@ class Main {
 		});
 		buttons.push(forceButton);
 		forceButton.mouseOverText = "$"+upgradeCosts[2];
+
+		mineButton = new Button(1550, buttony, "Go to new mine", simulation.input, function() {
+			if (simulation.money > 0) {
+				simulation.money -= 0;
+                Audio.play(kha.Assets.sounds.button);
+			}
+			mineButton.mouseOverText = "$"+upgradeCosts[2];
+			var newSimulation = new Simulation();
+			newSimulation.money = simulation.money;
+			newSimulation.laserLevel = simulation.laserLevel;
+			newSimulation.dynamiteForce = simulation.dynamiteForce;
+			newSimulation.dynamiteSpeed = simulation.dynamiteSpeed;
+			simulation.stop();
+			simulation = newSimulation;
+		});
+		buttons.push(mineButton);
+		mineButton.mouseOverText = "$20,000";
 	}
 
 	function update() {
