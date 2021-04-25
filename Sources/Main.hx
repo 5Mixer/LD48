@@ -14,6 +14,7 @@ class Main {
     var buttons = [];
 	var buttony = 60;
 	var upgradeCosts = [ 1000, 100, 100];
+	var mineNumber = 1;
 	function new() {
 
 		System.start({title: "LD48", width: 800, height: 600}, function (_) {
@@ -50,7 +51,7 @@ class Main {
 		buttons.push(laserButton);
 		laserButton.mouseOverText = "$"+upgradeCosts[0];
 
-		speedButton = new Button(650, buttony, "Upgrade Dynamite Speed", simulation.input, function() {
+		speedButton = new Button(550, buttony, "Upgrade Dynamite Speed", simulation.input, function() {
 			if (simulation.money > upgradeCosts[1]) {
 				simulation.dynamiteSpeedPurchase();
 				simulation.money -= upgradeCosts[1];
@@ -62,7 +63,7 @@ class Main {
 		buttons.push(speedButton);
 		speedButton.mouseOverText = "$"+upgradeCosts[1];
 
-		forceButton = new Button(1100, buttony, "Upgrade Dynamite Force", simulation.input, function() {
+		forceButton = new Button(900, buttony, "Upgrade Dynamite Force", simulation.input, function() {
 			if (simulation.money > upgradeCosts[2]) {
 				simulation.dynamiteForcePurchase();
 				simulation.money -= upgradeCosts[2];
@@ -74,19 +75,22 @@ class Main {
 		buttons.push(forceButton);
 		forceButton.mouseOverText = "$"+upgradeCosts[2];
 
-		mineButton = new Button(1550, buttony, "Go to new mine", simulation.input, function() {
-			if (simulation.money > 0) {
-				simulation.money -= 0;
+		mineButton = new Button(1250, buttony, "Go to new mine", simulation.input, function() {
+			if (simulation.money > mineNumber*20000) {
+				simulation.money -= mineNumber*20000;
+
+				mineNumber++;
+				mineButton.mouseOverText = "$"+(mineNumber*20)+",000";
                 Audio.play(kha.Assets.sounds.button);
+
+				var newSimulation = new Simulation();
+				newSimulation.money = simulation.money;
+				newSimulation.laserLevel = simulation.laserLevel;
+				newSimulation.dynamiteForce = simulation.dynamiteForce;
+				newSimulation.dynamiteSpeed = simulation.dynamiteSpeed;
+				simulation.stop();
+				simulation = newSimulation;
 			}
-			mineButton.mouseOverText = "$"+upgradeCosts[2];
-			var newSimulation = new Simulation();
-			newSimulation.money = simulation.money;
-			newSimulation.laserLevel = simulation.laserLevel;
-			newSimulation.dynamiteForce = simulation.dynamiteForce;
-			newSimulation.dynamiteSpeed = simulation.dynamiteSpeed;
-			simulation.stop();
-			simulation = newSimulation;
 		});
 		buttons.push(mineButton);
 		mineButton.mouseOverText = "$20,000";

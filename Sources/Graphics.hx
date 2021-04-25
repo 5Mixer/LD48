@@ -20,7 +20,6 @@ class Graphics {
         g.drawScaledSubImage(kha.Assets.images.tile, tile*100, 0, 100, 100, Math.round(x), Math.round(y), 20, 20);
     }
     public function drawText(x,y,text) {
-		g.fontSize = 50;
 		g.font = kha.Assets.fonts.BebasNeue_Regular;
         g.color = kha.Color.Black;
         g.drawString(text,x,y);

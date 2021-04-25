@@ -34,7 +34,7 @@ class Simulation {
 
     public var dynamiteForce = 1;
     public var dynamiteSpeed = 1;
-    public var laserLevel = 1;
+    public var laserLevel = 0;
     
     public function new() {
         var gravity = Vec2.weak(0, 600);
@@ -133,7 +133,7 @@ class Simulation {
         }
         audioChannels.push(Audio.play(kha.Assets.sounds.get('explosion'+(1+Math.floor(Math.random()*6)))));
         
-        explosion(Math.round(explodedDynamite.getPosition().x/20), Math.round((explodedDynamite.getPosition().y-600)/20), 2+dynamiteForce * (.8 +Math.random() * .4), movementVector.x, movementVector.y);
+        explosion(Math.round(explodedDynamite.getPosition().x/20), Math.round((explodedDynamite.getPosition().y-600)/20), 4+dynamiteForce * (2 +Math.random() * .4), movementVector.x, movementVector.y);
         dynamite.remove(explodedDynamite);
     }
     
@@ -179,7 +179,7 @@ class Simulation {
             reload = 1.3 / dynamiteSpeed;
         }
         
-        if (input.middleMouseButtonDown) {
+        if (input.middleMouseButtonDown && laserLevel > 0) {
             laserSound.volume = 1;
             
             if (ray != null) {
@@ -211,14 +211,15 @@ class Simulation {
         explosions.render(g);
         grid.render(g);
         
-        if (input.middleMouseButtonDown) {
+        if (input.middleMouseButtonDown && laserLevel > 0) {
             g.drawLaser(player.body.position.x, player.body.position.y, Math.atan2(input.getMouseWorldPosition().y-player.body.position.y, input.getMouseWorldPosition().x-player.body.position.x), rayDistance);
         }
         
         player.render(g);
         
         var turretVector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
-        g.drawImage(kha.Assets.images.laser_attachment, player.body.position.x-40, player.body.position.y-40, 80, 80, Math.atan2(turretVector.y, turretVector.x));
+        if (laserLevel > 0)
+            g.drawImage(kha.Assets.images.laser_attachment, player.body.position.x-40, player.body.position.y-40, 80, 80, Math.atan2(turretVector.y, turretVector.x));
         
         if (input.leftMouseButtonDown)
             g.drawImage(kha.Assets.images.jet_attachment, player.body.position.x-40, player.body.position.y-40, 80, 80, Math.PI+Math.atan2(turretVector.y, turretVector.x));

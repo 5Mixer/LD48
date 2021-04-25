@@ -7,9 +7,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="200"
-   height="50"
-   viewBox="0 0 52.916665 13.229167"
+   width="150"
+   height="30"
+   viewBox="0 0 39.687499 7.9375002"
    version="1.1"
    id="svg1442"
    inkscape:version="1.0.2 (e86c870879, 2021-01-15, custom)"
@@ -56,20 +56,20 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#9fa9b9;fill-opacity:1;stroke-width:2.065;stroke-linecap:round;stroke-linejoin:round;paint-order:markers stroke fill"
+       style="fill:#9fa9b9;fill-opacity:1;stroke-width:1.32653;stroke-linecap:round;stroke-linejoin:round;paint-order:markers stroke fill"
        id="rect2009"
-       width="51.171413"
-       height="11.537957"
-       x="1.0514885"
-       y="1.2888079"
-       ry="0.53174371" />
+       width="37.940166"
+       height="6.42172"
+       x="1.00126"
+       y="1.0221388"
+       ry="0.29595441" />
     <rect
-       style="fill:#e2e5ea;fill-opacity:1;stroke-width:2.065;stroke-linecap:round;stroke-linejoin:round;paint-order:markers stroke fill"
+       style="fill:#e2e5ea;fill-opacity:1;stroke-width:1.32241;stroke-linecap:round;stroke-linejoin:round;paint-order:markers stroke fill"
        id="rect2007"
-       width="51.171413"
-       height="11.537957"
+       width="37.705013"
+       height="6.42172"
        x="0.68442225"
        y="0.68742514"
-       ry="0.53174371" />
+       ry="0.29595441" />
   </g>
 </svg>
