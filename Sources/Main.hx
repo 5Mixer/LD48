@@ -29,7 +29,8 @@ class Main {
 	function init() {
 		simulation = new Simulation();
 		Mouse.get().notify(function(b,x,y){
-			simulation.initialise();
+			if (b == 0)
+				simulation.initialise();
 		},null,null);
 
 	}
@@ -43,7 +44,9 @@ class Main {
 		var g = framebuffer.g2;
 		g.begin(true,kha.Color.fromValue(0x0d1219));
 		graphics.setG2(g);
+        simulation.camera.transform(g);
 		simulation.render(graphics);
+		simulation.camera.reset(g);
 		g.fontSize = 50;
 		g.font = kha.Assets.fonts.BebasNeue_Regular;
 		g.drawString("$"+simulation.money, 100, 100);

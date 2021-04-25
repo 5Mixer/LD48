@@ -8,22 +8,22 @@ class ParticleSystem {
     }
     function getParticle() {
         if (deadParticles.length > 0) {
-            return deadParticles.pop();
+            // return deadParticles.pop();
         }
         var newParticle = new Particle();
         particles.push(newParticle);
         return newParticle;
     }
-    public function explode(x,y,force) {
-        for (i in 0...40) {
+    public function explode(x,y,force,vx,vy) {
+        for (i in 0...50) {
             var angle = Math.PI * 2 * Math.random();
             var speed = 4+Math.random() * 16;
             var p = getParticle();
             p.position.x = x;
             p.position.y = y;
             p.size = 1+Math.floor(Math.random()*6);
-            p.velocity.x = Math.cos(angle) * speed/p.size;
-            p.velocity.y = Math.sin(angle) * speed/p.size;
+            p.velocity.x = Math.cos(angle) * speed/p.size + vx;
+            p.velocity.y = Math.sin(angle) * speed/p.size + vy;
             p.life = 0;
             p.lifetime = .2 + Math.random()*.4;
         }

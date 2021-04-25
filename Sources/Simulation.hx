@@ -1,5 +1,6 @@
 package ;
 
+import kha.audio1.Audio;
 import nape.geom.Vec2;
 import nape.space.Space;
 
@@ -10,12 +11,35 @@ class Simulation {
     var launchers:Array<Launcher> = [];
     var explosions = new ParticleSystem();
 
+    public var camera:Camera;
+    var input:Input;
+
     public var money = 0;
     public var mineralValues = [0, 5, 10, 30, 50];
+
+    var audioChannels = [];
  
     public function new() {
         var gravity = Vec2.weak(0, 600);
         space = new Space(gravity);
+
+        camera = new Camera();
+        input = new Input(camera);
+
+        input.onMouseMove = function(dx,dy) {
+			if (input.middleMouseButtonDown) {
+				camera.position.x -= dx;
+				camera.position.y -= dy;
+			}
+		};
+		input.onScroll = function(delta) {
+            // camera.position.y += delta * 60;
+			// if (mouseInUI()) {
+			// 	ui.scroll(delta);
+			// }else{
+				camera.zoomOn(input.getMouseScreenPosition(), delta);
+			// }
+		}
  
         initialise();
     }
@@ -37,14 +61,16 @@ class Simulation {
         }
     }
 
-    function explosion(x,y,force) {
+    function explosion(x,y,force:Float, vx=0., vy=0.) {
         var explosionOrigin = Vec2.get(x*20, 600 + y*20);
 
-        explosions.explode(explosionOrigin.x,explosionOrigin.y,force);
+        explosions.explode(explosionOrigin.x,explosionOrigin.y,force,vx,vy);
+
+        var forceSquared = force*force/4;
         
         for (localx in Math.floor(-force/2)...Math.ceil(force/2)) {
             for (localy in Math.floor(-force/2)...Math.ceil(force/2)) {
-                if (Math.abs(localx)+Math.abs(localy) < force) {
+                if (Math.pow(localx,2)+Math.pow(localy,2) < forceSquared) {
                     
                     var tile = grid.getTile(x+localx, y+localy);
                     money += mineralValues[tile];
@@ -70,12 +96,29 @@ class Simulation {
     }
 
     public function dynamiteExplosion(explodedDynamite:Dynamite) {
-        explosion(Math.round(explodedDynamite.getPosition().x/20), Math.round((explodedDynamite.getPosition().y-600)/20), 5);
+        var movementVector = explodedDynamite.body.velocity.copy();
+        if (movementVector.length > 0) {
+            movementVector.length = Math.min(5, 2 + movementVector.length/50);
+        }
+
+        var force = 4+Math.random()*4;
+
+        if (audioChannels.length > 5) {
+            audioChannels.shift().stop();
+        }
+        audioChannels.push(Audio.play(kha.Assets.sounds.get('explosion'+(1+Math.floor(Math.random()*6)))));
+
+        explosion(Math.round(explodedDynamite.getPosition().x/20), Math.round((explodedDynamite.getPosition().y-600)/20), force, movementVector.x, movementVector.y);
         dynamite.remove(explodedDynamite);
     }
 
     public function update(delta:Float) {
         space.step(1/60);
+
+        for (audioChannel in audioChannels) {
+            if (audioChannel.finished)
+                audioChannels.remove(audioChannel);
+        }
 
         for (dynamite in dynamite) {
             dynamite.update(delta);
