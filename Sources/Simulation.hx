@@ -182,7 +182,7 @@ class Simulation {
                     
                     switch (cast(ray.shape.body.userData.data, BodyData)) {
                         case Tile(x,y): {
-                            grid.damage(x,y, 100);
+                            grid.damage(x,y, 5);
                         }
                         case Dynamite(laserDynamite): {
                             laserDynamite.explode();
