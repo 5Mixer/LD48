@@ -165,7 +165,7 @@ class Simulation {
             launcher.update(delta);
         }
         
-        if (input.rightMouseButtonDown && reload <= 0.) {
+        if (input.right() && reload <= 0.) {
             var vector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
             var d = new Dynamite(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space, dynamiteExplosion);
             var speed = 600;
@@ -179,7 +179,7 @@ class Simulation {
             reload = 1.3 / dynamiteSpeed;
         }
         
-        if (input.middleMouseButtonDown && laserLevel > 0) {
+        if (input.middle() && laserLevel > 0) {
             laserSound.volume = 1;
             
             if (ray != null) {
@@ -211,7 +211,7 @@ class Simulation {
         explosions.render(g);
         grid.render(g);
         
-        if (input.middleMouseButtonDown && laserLevel > 0) {
+        if (input.middle() && laserLevel > 0) {
             g.drawLaser(player.body.position.x, player.body.position.y, Math.atan2(input.getMouseWorldPosition().y-player.body.position.y, input.getMouseWorldPosition().x-player.body.position.x), rayDistance);
         }
         
@@ -221,10 +221,10 @@ class Simulation {
         if (laserLevel > 0)
             g.drawImage(kha.Assets.images.laser_attachment, player.body.position.x-40, player.body.position.y-40, 80, 80, Math.atan2(turretVector.y, turretVector.x));
         
-        if (input.leftMouseButtonDown)
+        if (input.left())
             g.drawImage(kha.Assets.images.jet_attachment, player.body.position.x-40, player.body.position.y-40, 80, 80, Math.PI+Math.atan2(turretVector.y, turretVector.x));
         
-        if (input.leftMouseButtonDown && player.body.velocity.length > 1) {
+        if (input.left() && player.body.velocity.length > 1) {
             var jetVector = turretVector.mult(-20);
             explosions.explode(player.body.position.x,player.body.position.y, 10, jetVector.x, jetVector.y);
         }

@@ -1,5 +1,7 @@
 package ;
 
+import kha.input.KeyCode;
+import kha.input.Keyboard;
 import kha.input.Mouse;
 import kha.math.Vector2;
 
@@ -16,13 +18,32 @@ class Input {
     public var onLeftDown:Array<()->Void> = [];
     public var onMouseMove:(Int,Int)->Void;
     public var onScroll:(Int)->Void;
+    public var downKeys:Array<KeyCode> = [];
 
     public function new(camera) {
         this.camera = camera;
         
         Mouse.get().notify(onMouseDown, onMouseUp, mouseMoveHandler, onMouseWheel);
+        Keyboard.get().notify(function(key) {
+            downKeys.push(key);
+        }, function (key){
+            while (downKeys.contains(key))
+                downKeys.remove(key);
+        },null);
 
         mousePosition = new Vector2();
+    }
+
+    public function left() {
+        return leftMouseButtonDown || downKeys.contains(KeyCode.Q);
+    }
+    public function middle() {
+        return middleMouseButtonDown || downKeys.contains(KeyCode.W);
+
+    }
+    public function right() {
+        return rightMouseButtonDown || downKeys.contains(KeyCode.E);
+
     }
     
     function onMouseDown(button:Int, x:Int, y:Int) {

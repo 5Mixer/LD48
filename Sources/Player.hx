@@ -41,12 +41,12 @@ class Player {
         return body.position;
     }
     public function update(delta:Float, input:Input) {
-        if (input.leftMouseButtonDown) {
+        if (input.left()) {
             var impulse = input.getMouseWorldPosition().sub(new Vector2(body.position.x, body.position.y));
             impulse.length = Math.max(500, Math.min(impulse.length/2, 800));
             body.applyImpulse(Vec2.weak(impulse.x, impulse.y));
         }
 
-        flyingSound.volume = (9 * flyingSound.volume + (input.leftMouseButtonDown ? flyingVolume : 0)) / 10;
+        flyingSound.volume = (9 * flyingSound.volume + (input.left() ? flyingVolume : 0)) / 10;
     }
 }
