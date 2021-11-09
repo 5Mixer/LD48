@@ -17,7 +17,7 @@ class Main {
 	var mineNumber = 1;
 
 	function new() {
-		System.start({title: "LD48", width: 800, height: 600}, function(_) {
+		System.start({title: "Orbdig", width: 800, height: 600}, function(_) {
 			#if js
 			var canvas = cast(js.Browser.document.getElementById('khanvas'), js.html.CanvasElement);
 			canvas.width = js.Browser.window.innerWidth;

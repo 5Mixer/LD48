@@ -25,7 +25,8 @@ class Camera {
 		}
 		scale = Math.max(0.5, scale);
 		scale = Math.min(2, scale);
-		// scale = Math.max(scale, kha.Window.get(0).width/worldWidth);
+
+		scale = Math.max(scale, kha.Window.get(0).width / worldWidth);
 		var newWorldPos = viewToWorld(screenPoint);
 		position = position.add(worldToView(oldWorldPos).sub(worldToView(newWorldPos)));
 	}

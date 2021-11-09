@@ -73,15 +73,17 @@ class Simulation {
 			money += mineralValues[tile];
 		}
 
-		player = new Player(600, 540, space);
+		player = new Player(600, -100, space);
 	}
 
-	function explosion(x, y, force:Float, vx = 0., vy = 0.) {
-		var explosionOrigin = Vec2.get(x * 20, 600 + y * 20);
-
-		explosions.explode(explosionOrigin.x, explosionOrigin.y, 90, vx, vy);
+	function explosion(position:Vector2, force:Float, vx = 0., vy = 0.) {
+		explosions.explode(position.x, position.y, Math.round(90 * force), vx, vy);
 
 		var forceSquared = force * force / 4;
+
+		var tileCoordinate = grid.worldPositionToTilePosition(position);
+		var x = tileCoordinate.x;
+		var y = tileCoordinate.y;
 
 		for (localx in Math.floor(-force / 2)...Math.ceil(force / 2)) {
 			for (localy in Math.floor(-force / 2)...Math.ceil(force / 2)) {
@@ -94,11 +96,15 @@ class Simulation {
 
 		var explosionForceEffect = 40;
 
-		for (body in space.bodiesInCircle(explosionOrigin, force * 20)) {
-			var deltaVector = body.position.sub(explosionOrigin);
-			deltaVector.length = explosionForceEffect * force * 20 / deltaVector.length;
+		var napePosition = Vec2.get(position.x, position.y);
+		var explosionForceRadius = force * 20;
+
+		for (body in space.bodiesInCircle(napePosition, explosionForceRadius)) {
+			var deltaVector = body.position.sub(napePosition);
+			deltaVector.length = explosionForceEffect * explosionForceRadius / deltaVector.length;
 			body.applyImpulse(deltaVector);
 		}
+		napePosition.dispose();
 	}
 
 	public function stop() {
@@ -131,8 +137,9 @@ class Simulation {
 		}
 		audioChannels.push(Audio.play(kha.Assets.sounds.get('explosion' + (1 + Math.floor(Math.random() * 6)))));
 
-		explosion(Math.round(explodedDynamite.getPosition().x / 20), Math.round((explodedDynamite.getPosition().y - 600) / 20),
-			4 + dynamiteForce * (2 + Math.random() * .4), movementVector.x, movementVector.y);
+		var explodedDynamitePosition = explodedDynamite.getPosition();
+		explosion(new Vector2(explodedDynamitePosition.x, explodedDynamitePosition.y), 4 + dynamiteForce * (2 + Math.random() * .4), movementVector.x,
+			movementVector.y);
 		dynamite.remove(explodedDynamite);
 	}
 
@@ -203,10 +210,10 @@ class Simulation {
 
 	public function render(g:Graphics) {
 		g.color = kha.Color.fromValue(0xffb4d8f5);
-		g.fillRect(0, -10000, 3000, 10100);
+		g.fillRect(0, -10000, 3000, 10000);
 		g.color = kha.Color.White;
 
-		GraphicsHelper.drawImage(g, kha.Assets.images.background, 0, 600 - 594, 3000, 594);
+		GraphicsHelper.drawImage(g, kha.Assets.images.background, 0, -594, 3000, 594);
 		explosions.render(g);
 		grid.render(g);
 
@@ -231,7 +238,7 @@ class Simulation {
 				+ Math.atan2(turretVector.y, turretVector.x));
 
 		if (input.left() && player.body.velocity.length > 1) {
-			var jetVector = turretVector.mult(-20);
+			var jetVector = turretVector.mult(-20 * (.8 + .4 * Math.random()));
 			explosions.explode(player.body.position.x, player.body.position.y, 10, jetVector.x, jetVector.y);
 		}
 

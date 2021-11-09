@@ -1,5 +1,8 @@
 package;
 
+import kha.math.Vector2i;
+import kha.math.FastMatrix3;
+import kha.math.Vector2;
 import kha.graphics2.Graphics;
 import hxnoise.Perlin;
 import nape.space.Space;
@@ -16,6 +19,8 @@ class Grid {
 	var bodies:Array<Body> = [];
 	var space:Space;
 
+	static var tileSize = 20;
+
 	public var tileRemovalCallback:Int->Void;
 
 	public function new(space) {
@@ -27,14 +32,14 @@ class Grid {
 				var tile = 1;
 				var health = 10;
 
-				var air = m_diamondSquare.OctavePerlin(x / 20, y / 20, seed, 4, 0.5, 0.6);
+				var air = m_diamondSquare.OctavePerlin(x / tileSize, y / tileSize, seed, 4, 0.5, 0.6);
 				var mineralA = m_diamondSquare.OctavePerlin(x / 12 + 1000, y / 3, seed, 3, 0.5, 0.25);
 				var mineralB = m_diamondSquare.OctavePerlin(x / 5 + 2000, y / 4, seed, 3, 0.5, 0.25);
 				var mineralC = m_diamondSquare.OctavePerlin(x / 2 + 3000, y / 2, seed, 3, 0.5, 0.25);
 				var mineralD = m_diamondSquare.OctavePerlin(x + 8000, y, seed, 3, 0.5, 0.25);
 				if (mineralA < .4) {
 					tile = 2;
-					health = 20;
+					health = tileSize;
 				}
 				if (mineralB < .4) {
 					tile = 3;
@@ -53,8 +58,6 @@ class Grid {
 					health = 0;
 				}
 
-				health = Math.round(health * .5 + Math.random() * health * .5);
-
 				tileHealth.push(health);
 				tiles.push(tile);
 				bodies.push(null);
@@ -65,44 +68,55 @@ class Grid {
 		constructShapes();
 	}
 
+	public function worldPositionToTilePosition(worldPosition:Vector2) {
+		return new Vector2i(Math.floor(worldPosition.x / tileSize), Math.floor(worldPosition.y / tileSize));
+	}
+
 	public function update() {}
 
 	public function render(g:Graphics) {
-		GraphicsHelper.startTiles(g);
+		g.mipmapScaleQuality = Low;
+		g.imageScaleQuality = Low;
+
 		for (x in 0...width) {
 			for (y in 0...height) {
 				if (getTile(x, y) != 0) {
-					GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, getTile(x, y) - 1);
+					drawTile(g, x, y, getTile(x, y) - 1);
 
 					if (getTile(x, y - 1) == 0) {
-						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 8);
+						drawTile(g, x, y, 8);
 					}
 					if (getTile(x, y + 1) == 0) {
-						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 9);
+						drawTile(g, x, y, 9);
 					}
 
 					if (getTile(x, y + 1) == 0 && getTile(x - 1, y) == 0) {
-						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 4);
+						drawTile(g, x, y, 4);
 					}
 					if (getTile(x, y - 1) == 0 && getTile(x - 1, y) == 0) {
-						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 5);
+						drawTile(g, x, y, 5);
 					}
 					if (getTile(x, y - 1) == 0 && getTile(x + 1, y) == 0) {
-						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 6);
+						drawTile(g, x, y, 6);
 					}
 					if (getTile(x, y + 1) == 0 && getTile(x + 1, y) == 0) {
-						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 7);
+						drawTile(g, x, y, 7);
 					}
 				}
 			}
 		}
-		GraphicsHelper.endTiles(g);
+		g.mipmapScaleQuality = High;
+		g.imageScaleQuality = High;
+	}
+
+	public static function drawTile(g:Graphics, x:Int, y:Int, tile) {
+		g.drawScaledSubImage(kha.Assets.images.tile, tile * 100, 0, 100, 100, x * tileSize, y * tileSize, tileSize, tileSize);
 	}
 
 	function makeBody(x, y) {
 		var body = new Body(BodyType.STATIC);
 		body.userData.data = BodyData.Tile(x, y);
-		body.shapes.add(new Polygon(Polygon.rect(x * 20, 600 + y * 20, 20, 20)));
+		body.shapes.add(new Polygon(Polygon.rect(x * tileSize, y * tileSize, tileSize, tileSize)));
 		body.space = space;
 
 		bodies[x * height + y] = body;

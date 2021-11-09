@@ -17,10 +17,6 @@ class GraphicsHelper {
 			g.popTransformation();
 	}
 
-	public static function drawTile(g:Graphics, x:Float, y:Float, tile) {
-		g.drawScaledSubImage(kha.Assets.images.tile, tile * 100, 0, 100, 100, Math.round(x), Math.round(y), 20, 20);
-	}
-
 	public static function drawText(g:Graphics, x, y, text) {
 		g.font = kha.Assets.fonts.BebasNeue_Regular;
 		g.color = kha.Color.Black;
@@ -43,15 +39,5 @@ class GraphicsHelper {
 			.multmat(FastMatrix3.translation(-x, -y)));
 		g.drawScaledImage(kha.Assets.images.laser, x, y - width / 2, distance, 10);
 		g.popTransformation();
-	}
-
-	public static function startTiles(g:Graphics) {
-		g.mipmapScaleQuality = Low;
-		g.imageScaleQuality = Low;
-	}
-
-	public static function endTiles(g:Graphics) {
-		g.mipmapScaleQuality = High;
-		g.imageScaleQuality = High;
 	}
 }
