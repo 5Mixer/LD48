@@ -1,4 +1,4 @@
-package ;
+package;
 
 import kha.audio1.AudioChannel;
 import nape.geom.Vec2;
@@ -9,44 +9,47 @@ import nape.phys.BodyType;
 import nape.space.Space;
 
 class Player {
-    public var body:Body;
+	public var body:Body;
 
-    var visualRotation = 0.;
-    var lastBodyRotation = 0.;
+	var visualRotation = 0.;
+	var lastBodyRotation = 0.;
 
-    public var flyingSound:AudioChannel;
-    var flyingVolume = .3;
+	public var flyingSound:AudioChannel;
 
-    public function new(x:Float, y:Float, space:Space) {
-        body = new Body(BodyType.DYNAMIC);
+	var flyingVolume = .3;
 
-        body.shapes.add(new Circle(30));
-        body.position.setxy(x, y);
-        body.setShapeMaterials(nape.phys.Material.steel());
-        body.space = space;
+	public function new(x:Float, y:Float, space:Space) {
+		body = new Body(BodyType.DYNAMIC);
 
-        flyingSound = kha.audio1.Audio.play(kha.Assets.sounds.flying, true);
-        flyingSound.volume = 0;
-    }
+		body.shapes.add(new Circle(30));
+		body.position.setxy(x, y);
+		body.setShapeMaterials(nape.phys.Material.steel());
+		body.space = space;
 
-    public function render(g:Graphics) {
-        visualRotation -= (lastBodyRotation-body.rotation) * .3; 
-        visualRotation *= .9;
-        g.drawImage(kha.Assets.images.player_bg, body.position.x-30, body.position.y-30, 60, 60, body.rotation);
-        g.drawImage(kha.Assets.images.player_fg, body.position.x-30, body.position.y-30, 60, 60, visualRotation);
+		flyingSound = kha.audio1.Audio.play(kha.Assets.sounds.flying, true);
+		flyingSound.volume = 0;
+	}
 
-        lastBodyRotation = body.rotation;
-    }
-    public function getPosition() {
-        return body.position;
-    }
-    public function update(delta:Float, input:Input) {
-        if (input.left()) {
-            var impulse = input.getMouseWorldPosition().sub(new Vector2(body.position.x, body.position.y));
-            impulse.length = Math.max(500, Math.min(impulse.length/2, 800));
-            body.applyImpulse(Vec2.weak(impulse.x, impulse.y));
-        }
+	public function render(g:Graphics) {
+		visualRotation -= (lastBodyRotation - body.rotation) * .3;
+		visualRotation *= .9;
+		g.drawImage(kha.Assets.images.player_bg, body.position.x - 30, body.position.y - 30, 60, 60, body.rotation);
+		g.drawImage(kha.Assets.images.player_fg, body.position.x - 30, body.position.y - 30, 60, 60, visualRotation);
 
-        flyingSound.volume = (9 * flyingSound.volume + (input.left() ? flyingVolume : 0)) / 10;
-    }
+		lastBodyRotation = body.rotation;
+	}
+
+	public function getPosition() {
+		return body.position;
+	}
+
+	public function update(delta:Float, input:Input) {
+		if (input.left()) {
+			var impulse = input.getMouseWorldPosition().sub(new Vector2(body.position.x, body.position.y));
+			impulse.length = Math.max(500, Math.min(impulse.length / 2, 800));
+			body.applyImpulse(Vec2.weak(impulse.x, impulse.y));
+		}
+
+		flyingSound.volume = (9 * flyingSound.volume + (input.left() ? flyingVolume : 0)) / 10;
+	}
 }
