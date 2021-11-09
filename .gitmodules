@@ -1,0 +1,6 @@
+[submodule "Libraries/hxNoise"]
+	path = Libraries/hxNoise
+	url = https://github.com/whuop/hxNoise.git
+[submodule "Libraries/nape"]
+	path = Libraries/nape
+	url = https://github.com/HaxeFlixel/nape-haxe4.git
