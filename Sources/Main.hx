@@ -10,7 +10,6 @@ import kha.System;
 
 class Main {
 	var simulation:Simulation;
-	var graphics:Graphics;
 	var lastTime = Scheduler.time();
 	var buttons = [];
 	var buttony = 60;
@@ -32,8 +31,6 @@ class Main {
 				for (asset in kha.Assets.images.names) {
 					kha.Assets.images.get(asset).generateMipmaps(8);
 				}
-
-				graphics = new Graphics();
 
 				lastTime = Scheduler.time();
 
@@ -131,16 +128,15 @@ class Main {
 		g.mipmapScaleQuality = ImageScaleQuality.High;
 
 		g.begin(true, kha.Color.fromValue(0x0d1219));
-		graphics.setG2(g);
 		simulation.camera.transform(g);
-		simulation.render(graphics);
+		simulation.render(g);
 		simulation.camera.reset(g);
 		g.fontSize = 50;
 		g.font = kha.Assets.fonts.BebasNeue_Regular;
 		g.drawString("$" + simulation.money, buttony, 100);
 
 		for (button in buttons) {
-			button.render(graphics);
+			button.render(g);
 		}
 
 		g.end();

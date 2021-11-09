@@ -1,5 +1,6 @@
 package;
 
+import kha.graphics2.Graphics;
 import kha.math.Vector2;
 
 class Button {
@@ -29,9 +30,9 @@ class Button {
 		var fontSize = 30;
 		var mousePos = input.getMouseScreenPosition();
 		var mouseOver = mousePos.x > position.x && mousePos.y > position.y && mousePos.x < position.x + width && mousePos.y < position.y + height;
-		g.drawImage(kha.Assets.images.button, position.x, position.y, width, height);
-		g.g.fontSize = fontSize;
+		GraphicsHelper.drawImage(g, kha.Assets.images.button, position.x, position.y, width, height);
+		g.fontSize = fontSize;
 		var shownText = mouseOver ? mouseOverText : text;
-		g.drawText(position.x + width / 2 - g.g.font.width(g.g.fontSize, shownText) / 2, position.y + height / 2 - fontSize / 2, shownText);
+		GraphicsHelper.drawText(g, position.x + width / 2 - g.font.width(g.fontSize, shownText) / 2, position.y + height / 2 - fontSize / 2, shownText);
 	}
 }

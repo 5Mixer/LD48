@@ -1,5 +1,6 @@
 package;
 
+import kha.graphics2.Graphics;
 import hxnoise.Perlin;
 import nape.space.Space;
 import nape.phys.Body;
@@ -18,7 +19,7 @@ class Grid {
 	public var tileRemovalCallback:Int->Void;
 
 	public function new(space) {
-		var m_diamondSquare = new Perlin(); // width, height, 64, 2, function() { return Math.random() - .5; });
+		var m_diamondSquare = new Perlin();
 		var seed = Math.random() * 100000;
 
 		for (x in 0...width) {
@@ -67,35 +68,35 @@ class Grid {
 	public function update() {}
 
 	public function render(g:Graphics) {
-		g.startTiles();
+		GraphicsHelper.startTiles(g);
 		for (x in 0...width) {
 			for (y in 0...height) {
 				if (getTile(x, y) != 0) {
-					g.drawTile(x * 20, y * 20 + 600, getTile(x, y) - 1);
+					GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, getTile(x, y) - 1);
 
 					if (getTile(x, y - 1) == 0) {
-						g.drawTile(x * 20, y * 20 + 600, 8);
+						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 8);
 					}
 					if (getTile(x, y + 1) == 0) {
-						g.drawTile(x * 20, y * 20 + 600, 9);
+						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 9);
 					}
 
 					if (getTile(x, y + 1) == 0 && getTile(x - 1, y) == 0) {
-						g.drawTile(x * 20, y * 20 + 600, 4);
+						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 4);
 					}
 					if (getTile(x, y - 1) == 0 && getTile(x - 1, y) == 0) {
-						g.drawTile(x * 20, y * 20 + 600, 5);
+						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 5);
 					}
 					if (getTile(x, y - 1) == 0 && getTile(x + 1, y) == 0) {
-						g.drawTile(x * 20, y * 20 + 600, 6);
+						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 6);
 					}
 					if (getTile(x, y + 1) == 0 && getTile(x + 1, y) == 0) {
-						g.drawTile(x * 20, y * 20 + 600, 7);
+						GraphicsHelper.drawTile(g, x * 20, y * 20 + 600, 7);
 					}
 				}
 			}
 		}
-		g.endTiles();
+		GraphicsHelper.endTiles(g);
 	}
 
 	function makeBody(x, y) {

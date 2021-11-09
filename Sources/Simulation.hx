@@ -1,5 +1,6 @@
 package;
 
+import kha.graphics2.Graphics;
 import nape.shape.Polygon;
 import nape.phys.BodyType;
 import nape.phys.Body;
@@ -201,28 +202,29 @@ class Simulation {
 	}
 
 	public function render(g:Graphics) {
-		g.g.color = kha.Color.fromValue(0xffb4d8f5);
-		g.g.fillRect(0, -10000, 3000, 10100);
-		g.g.color = kha.Color.White;
+		g.color = kha.Color.fromValue(0xffb4d8f5);
+		g.fillRect(0, -10000, 3000, 10100);
+		g.color = kha.Color.White;
 
-		g.drawImage(kha.Assets.images.background, 0, 600 - 594, 3000, 594);
+		GraphicsHelper.drawImage(g, kha.Assets.images.background, 0, 600 - 594, 3000, 594);
 		explosions.render(g);
 		grid.render(g);
 
 		if (input.middle() && laserLevel > 0) {
-			g.drawLaser(player.body.position.x, player.body.position.y,
+			GraphicsHelper.drawLaser(g, player.body.position.x, player.body.position.y,
 				Math.atan2(input.getMouseWorldPosition().y - player.body.position.y, input.getMouseWorldPosition().x - player.body.position.x), rayDistance);
 		}
 
 		player.render(g);
 
 		var turretVector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
-		if (laserLevel > 0)
-			g.drawImage(kha.Assets.images.laser_attachment, player.body.position.x - 40, player.body.position.y - 40, 80, 80,
+		if (laserLevel > 0) {
+			GraphicsHelper.drawImage(g, kha.Assets.images.laser_attachment, player.body.position.x - 40, player.body.position.y - 40, 80, 80,
 				Math.atan2(turretVector.y, turretVector.x));
+		}
 
 		if (input.left())
-			g.drawImage(kha.Assets.images.jet_attachment, player.body.position.x
+			GraphicsHelper.drawImage(g, kha.Assets.images.jet_attachment, player.body.position.x
 				- 40, player.body.position.y
 				- 40, 80, 80,
 				Math.PI

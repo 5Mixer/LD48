@@ -1,5 +1,6 @@
 package;
 
+import kha.graphics2.Graphics;
 import nape.phys.Body;
 import nape.phys.BodyType;
 import nape.shape.Polygon;
@@ -27,7 +28,7 @@ class Dynamite {
 	}
 
 	public function render(g:Graphics) {
-		g.drawImage(kha.Assets.images.dynamite, body.position.x - 5, body.position.y - 10, 10, 20, body.rotation);
+		GraphicsHelper.drawImage(g, kha.Assets.images.dynamite, body.position.x - 5, body.position.y - 10, 10, 20, body.rotation);
 	}
 
 	public function getPosition() {

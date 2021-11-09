@@ -1,5 +1,6 @@
 package;
 
+import kha.graphics2.Graphics;
 import kha.audio1.AudioChannel;
 import nape.geom.Vec2;
 import kha.math.Vector2;
@@ -33,8 +34,8 @@ class Player {
 	public function render(g:Graphics) {
 		visualRotation -= (lastBodyRotation - body.rotation) * .3;
 		visualRotation *= .9;
-		g.drawImage(kha.Assets.images.player_bg, body.position.x - 30, body.position.y - 30, 60, 60, body.rotation);
-		g.drawImage(kha.Assets.images.player_fg, body.position.x - 30, body.position.y - 30, 60, 60, visualRotation);
+		GraphicsHelper.drawImage(g, kha.Assets.images.player_bg, body.position.x - 30, body.position.y - 30, 60, 60, body.rotation);
+		GraphicsHelper.drawImage(g, kha.Assets.images.player_fg, body.position.x - 30, body.position.y - 30, 60, 60, visualRotation);
 
 		lastBodyRotation = body.rotation;
 	}

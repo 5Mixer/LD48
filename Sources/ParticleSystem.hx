@@ -1,5 +1,7 @@
 package;
 
+import kha.graphics2.Graphics;
+
 class ParticleSystem {
 	var particles:Array<Particle> = [];
 	var deadParticles:Array<Particle> = [];
@@ -49,7 +51,7 @@ class ParticleSystem {
 
 	public function render(g:Graphics) {
 		for (particle in particles) {
-			g.drawParticle(particle.position.x, particle.position.y, particle.life / particle.lifetime, particle.size);
+			GraphicsHelper.drawParticle(g, particle.position.x, particle.position.y, particle.life / particle.lifetime, particle.size);
 		}
 	}
 }
