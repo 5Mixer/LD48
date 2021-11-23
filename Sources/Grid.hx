@@ -26,7 +26,7 @@ class Grid {
 
 	public static final tileSize = 20;
 
-	public var tileRemovalCallback:Int->Void;
+	public var tileRemovalCallback:(tile:Int, x:Int, y:Int) -> Void;
 
 	public function new(space) {
 		var m_diamondSquare = new Perlin();
@@ -41,7 +41,6 @@ class Grid {
 				var mineralA = m_diamondSquare.OctavePerlin(x / 12 + 1000, y / 3, seed, 3, 0.5, 0.25);
 				var mineralB = m_diamondSquare.OctavePerlin(x / 5 + 2000, y / 4, seed, 3, 0.5, 0.25);
 				var mineralC = m_diamondSquare.OctavePerlin(x / 2 + 3000, y / 2, seed, 3, 0.5, 0.25);
-				var mineralD = m_diamondSquare.OctavePerlin(x + 8000, y, seed, 3, 0.5, 0.25);
 				if (mineralA < .4) {
 					tile = 2;
 					health = tileSize;
@@ -53,10 +52,6 @@ class Grid {
 				if (mineralC < .4) {
 					tile = 4;
 					health = 80;
-				}
-				if (mineralD < .25) {
-					tile = 11;
-					health = 300;
 				}
 				if (air < .45) {
 					tile = 0;
@@ -138,15 +133,16 @@ class Grid {
 
 	public function damage(x, y, damage) {
 		tileHealth[x * height + y] -= damage;
-		if (tileHealth[x * height + y] <= 0)
+		if (tileHealth[x * height + y] <= 0) {
 			remove(x, y);
+		}
 	}
 
 	public function remove(x, y) {
-		if (x < 0 || y < 0 || x >= width || y >= height)
+		if (x < 0 || y < 0 || x >= width || y >= height || tiles[x * height + y] == 0)
 			return;
 
-		tileRemovalCallback(tiles[x * height + y]);
+		tileRemovalCallback(tiles[x * height + y], x, y);
 		tiles[x * height + y] = 0;
 
 		if (bodies[x * height + y] != null) {

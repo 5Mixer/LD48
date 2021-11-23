@@ -25,6 +25,7 @@ class Simulation {
 	var player:Player;
 
 	var dynamite:Array<Dynamite> = [];
+	var drops:Array<TileDrop> = [];
 	var bullets:Array<Bullet> = [];
 	var explosions = new ParticleSystem();
 
@@ -85,6 +86,14 @@ class Simulation {
 				explosion(position, 3, vx, vy);
 			}));
 
+		space.listeners.add(new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Player.callbackType, TileDrop.callbackType,
+			function(callback:InteractionCallback) {
+				var drop:TileDrop = cast callback.int2.userData.drop;
+
+				drop.body.space = null;
+				drops.remove(drop);
+			}));
+
 		var walls = new Body(BodyType.STATIC);
 		walls.shapes.add(new Polygon(Polygon.rect(-100, -10000, 100, 1000000)));
 		walls.shapes.add(new Polygon(Polygon.rect(3000, -10000, 100, 1000000)));
@@ -94,8 +103,13 @@ class Simulation {
 
 		grid = new Grid(space);
 
-		grid.tileRemovalCallback = function(tile) {
+		grid.tileRemovalCallback = function(tile, x, y) {
 			money += mineralValues[tile];
+
+			if (tile == 0 || Math.random() > .4)
+				return;
+
+			drops.push(new TileDrop((x + .5) * Grid.tileSize, (y + .5) * Grid.tileSize, tile, space));
 		}
 
 		player = new Player(600, -100, space);
@@ -125,7 +139,7 @@ class Simulation {
 		var explosionForceRadius = force * 20;
 
 		for (body in space.bodiesInCircle(napePosition, explosionForceRadius, false,
-			new InteractionFilter(CollisionLayers.DYNAMITE | CollisionLayers.PLAYER))) {
+			new InteractionFilter(CollisionLayers.DYNAMITE | CollisionLayers.PLAYER | CollisionLayers.TILE_DROP))) {
 			var deltaVector = body.position.sub(napePosition);
 			deltaVector.length = explosionForceEffect * explosionForceRadius / deltaVector.length;
 			body.applyImpulse(deltaVector);
@@ -175,6 +189,18 @@ class Simulation {
 		space.step(1 / 60);
 
 		reload -= delta;
+
+		for (drop in drops) {
+			// var deltaVector = player.body.position.sub(drop.body.position);
+			// deltaVector.muleq(10 / deltaVector.length);
+			// drop.body.applyImpulse(deltaVector);
+
+			drop.age += delta;
+			if (drop.age >= drop.deathAge) {
+				drops.remove(drop);
+				drop.body.space = null;
+			}
+		}
 
 		var directionVector = Vec2.get(input.getMouseWorldPosition().x, input.getMouseWorldPosition().y).sub(player.body.position).muleq(1000);
 		var ray = space.rayCast(Ray.fromSegment(player.body.position, player.body.position.add(directionVector, true)));
@@ -280,6 +306,9 @@ class Simulation {
 			explosions.explode(player.body.position.x, player.body.position.y, 10, jetVector.x, jetVector.y);
 		}
 
+		for (drop in drops) {
+			drop.render(g);
+		}
 		for (dynamite in dynamite) {
 			dynamite.render(g);
 		}

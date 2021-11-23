@@ -29,8 +29,7 @@ class Player {
 
 		body.shapes.add(new Circle(30));
 		body.setShapeMaterials(nape.phys.Material.steel());
-		body.setShapeFilters(new InteractionFilter(CollisionLayers.PLAYER,
-			CollisionLayers.TILE | CollisionLayers.DYNAMITE | CollisionLayers.PLAYER | CollisionLayers.BULLET));
+		body.setShapeFilters(new InteractionFilter(CollisionLayers.PLAYER));
 		body.space = space;
 
 		body.cbTypes.add(callbackType);
