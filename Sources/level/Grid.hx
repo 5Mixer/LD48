@@ -39,24 +39,50 @@ class Grid {
 				var health = 10;
 
 				var air = m_diamondSquare.OctavePerlin(x / tileSize, y / tileSize, seed, 4, 0.5, 0.6);
-				var mineralA = m_diamondSquare.OctavePerlin(x / 12 + 1000, y / 3, seed, 3, 0.5, 0.25);
-				var mineralB = m_diamondSquare.OctavePerlin(x / 5 + 2000, y / 4, seed, 3, 0.5, 0.25);
-				var mineralC = m_diamondSquare.OctavePerlin(x / 2 + 3000, y / 2, seed, 3, 0.5, 0.25);
-				if (mineralA < .4) {
+				var mineralA = m_diamondSquare.OctavePerlin(x / 10, y / 3, seed + 1000, 3, 0.5, 0.25);
+				var mineralB = m_diamondSquare.OctavePerlin(x / 4, y / 4, seed + 2000, 3, 0.5, 0.25);
+				var mineralC = m_diamondSquare.OctavePerlin(x / 2, y / 2, seed + 3000, 3, 0.5, 0.25);
+				var dirtVariant = m_diamondSquare.OctavePerlin(x / 3, y / 3, seed + 4000, 3, 0.5, 0.25);
+
+				var land = m_diamondSquare.OctavePerlin(x / 10, 0, seed, 3, 0.5, 0.25);
+				var dirt = m_diamondSquare.OctavePerlin(x / 10, 1, seed, 3, 0.5, 0.25);
+
+				tile = dirtVariant < .5 ? 1 : 9;
+
+				if (mineralA < .3) {
 					tile = 2;
-					health = tileSize;
+					health = 20;
 				}
-				if (mineralB < .4) {
+				if (mineralB < .3) {
 					tile = 3;
 					health = 50;
 				}
-				if (mineralC < .4) {
+				if (mineralC < .3) {
 					tile = 4;
 					health = 80;
 				}
 				if (air < .45) {
 					tile = 0;
 					health = 0;
+				}
+
+				var landy:Int = 10 + Math.floor(land * 30);
+				var dirty:Int = 10 + Math.floor(dirt * 30);
+				if (y < landy + 20) {
+					tile = dirtVariant < .5 ? 5 : 7;
+					health = 10;
+				}
+				if (y < dirty + 6) {
+					tile = 6;
+					health = 5;
+				}
+				if (y < landy) {
+					tile = 0;
+					health = 0;
+				}
+				if (y == landy - 1 && Math.random() < .1) {
+					tile = 8;
+					health = 1;
 				}
 
 				tileHealth.push(health);
@@ -89,26 +115,26 @@ class Grid {
 		for (x in topLeftTileFrustrum.x...bottomRightTileFrustrum.x) {
 			for (y in topLeftTileFrustrum.y...bottomRightTileFrustrum.y) {
 				if (getTile(x, y) != 0) {
-					drawTile(g, x, y, getTile(x, y) - 1);
+					drawTile(g, x, y, getTile(x, y) - 1, 0);
 
 					if (getTile(x, y - 1) == 0) {
-						drawTile(g, x, y, 8);
+						drawTile(g, x, y, 4, 2);
 					}
 					if (getTile(x, y + 1) == 0) {
-						drawTile(g, x, y, 9);
+						drawTile(g, x, y, 5, 2);
 					}
 
 					if (getTile(x, y + 1) == 0 && getTile(x - 1, y) == 0) {
-						drawTile(g, x, y, 4);
+						drawTile(g, x, y, 0, 2);
 					}
 					if (getTile(x, y - 1) == 0 && getTile(x - 1, y) == 0) {
-						drawTile(g, x, y, 5);
+						drawTile(g, x, y, 1, 2);
 					}
 					if (getTile(x, y - 1) == 0 && getTile(x + 1, y) == 0) {
-						drawTile(g, x, y, 6);
+						drawTile(g, x, y, 2, 2);
 					}
 					if (getTile(x, y + 1) == 0 && getTile(x + 1, y) == 0) {
-						drawTile(g, x, y, 7);
+						drawTile(g, x, y, 3, 2);
 					}
 				}
 			}
@@ -117,8 +143,8 @@ class Grid {
 		g.imageScaleQuality = High;
 	}
 
-	public static function drawTile(g:Graphics, x:Int, y:Int, tile) {
-		g.drawScaledSubImage(kha.Assets.images.tile, tile * 125, 0, 100, 100, x * tileSize, y * tileSize, tileSize, tileSize);
+	public static function drawTile(g:Graphics, x:Int, y:Int, tilex:Int, tiley:Int) {
+		g.drawScaledSubImage(kha.Assets.images.tile, tilex * 125, tiley * 125, 100, 100, x * tileSize, y * tileSize, tileSize, tileSize);
 	}
 
 	function makeBody(x, y) {
