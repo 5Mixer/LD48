@@ -31,6 +31,8 @@ class Simulation {
 	public var camera:Camera;
 	public var input:Input;
 
+	var lava:Fluid;
+
 	public var money = 0;
 	public var mineralValues = [
 		0, 5, 10, 30, 50, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150
@@ -69,6 +71,8 @@ class Simulation {
 
 		dynamite = [];
 		space.clear();
+
+		lava = new Fluid(space);
 
 		space.listeners.add(new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Bullet.callbackType, [Grid.tileCallbackType],
 			function(callback:InteractionCallback) {
@@ -254,6 +258,8 @@ class Simulation {
 		GraphicsHelper.drawImage(g, kha.Assets.images.background, 0, -594, 3000, 594);
 		explosions.render(g);
 		grid.render(g);
+
+		lava.render(g);
 
 		if (input.middle() && laserLevel > 0) {
 			GraphicsHelper.drawLaser(g, player.body.position.x, player.body.position.y,
