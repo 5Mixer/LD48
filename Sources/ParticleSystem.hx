@@ -10,7 +10,7 @@ class ParticleSystem {
 
 	function getParticle() {
 		if (deadParticles.length > 0) {
-			// return deadParticles.pop();
+			return deadParticles.pop();
 		}
 		var newParticle = new Particle();
 		particles.push(newParticle);

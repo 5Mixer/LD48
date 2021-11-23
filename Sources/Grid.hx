@@ -1,5 +1,7 @@
 package;
 
+import nape.callbacks.CbType;
+import nape.dynamics.InteractionFilter;
 import kha.math.FastVector2;
 import kha.math.Vector2i;
 import kha.math.Vector2;
@@ -19,7 +21,10 @@ class Grid {
 	var bodies:Array<Body> = [];
 	var space:Space;
 
-	static var tileSize = 20;
+	public static var tileCallbackType = new CbType();
+	public static var levelCallbackType = new CbType();
+
+	public static final tileSize = 20;
 
 	public var tileRemovalCallback:Int->Void;
 
@@ -123,7 +128,9 @@ class Grid {
 	function makeBody(x, y) {
 		var body = new Body(BodyType.STATIC);
 		body.userData.data = BodyData.Tile(x, y);
+		body.cbTypes.add(tileCallbackType);
 		body.shapes.add(new Polygon(Polygon.rect(x * tileSize, y * tileSize, tileSize, tileSize)));
+		body.setShapeFilters(new InteractionFilter(CollisionLayers.TILE));
 		body.space = space;
 
 		bodies[x * height + y] = body;

@@ -1,5 +1,7 @@
 package;
 
+import nape.callbacks.CbType;
+import nape.dynamics.InteractionFilter;
 import kha.graphics2.Graphics;
 import kha.audio1.AudioChannel;
 import nape.geom.Vec2;
@@ -19,13 +21,19 @@ class Player {
 
 	var flyingVolume = .3;
 
+	public static var callbackType = new CbType();
+
 	public function new(x:Float, y:Float, space:Space) {
 		body = new Body(BodyType.DYNAMIC);
+		body.position.setxy(x, y);
 
 		body.shapes.add(new Circle(30));
-		body.position.setxy(x, y);
 		body.setShapeMaterials(nape.phys.Material.steel());
+		body.setShapeFilters(new InteractionFilter(CollisionLayers.PLAYER,
+			CollisionLayers.TILE | CollisionLayers.DYNAMITE | CollisionLayers.PLAYER | CollisionLayers.BULLET));
 		body.space = space;
+
+		body.cbTypes.add(callbackType);
 
 		flyingSound = kha.audio1.Audio.play(kha.Assets.sounds.flying, true);
 		flyingSound.volume = 0;

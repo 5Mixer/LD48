@@ -1,5 +1,6 @@
 package;
 
+import nape.dynamics.InteractionFilter;
 import kha.graphics2.Graphics;
 import nape.phys.Body;
 import nape.phys.BodyType;
@@ -13,18 +14,25 @@ class Dynamite {
 	var explodeCallback:(Dynamite) -> Void;
 
 	public function new(x:Float, y:Float, space:Space, explodeCallback:(Dynamite) -> Void) {
-		body = new Body(BodyType.DYNAMIC);
-
 		timer = 2 + Math.random() * .5;
 		this.explodeCallback = explodeCallback;
 
-		body.shapes.add(new Polygon(Polygon.box(10, 20)));
+		body = new Body(BodyType.DYNAMIC);
 		body.position.setxy(x, y);
+
+		body.shapes.add(new Polygon(Polygon.box(10, 20)));
 		body.setShapeMaterials(nape.phys.Material.glass());
+		body.setShapeFilters(new InteractionFilter(CollisionLayers.DYNAMITE));
+
 		body.angularVel = Math.random() * 2 - 1;
 		body.rotation = Math.PI * 2 * Math.random();
 		body.userData.data = BodyData.Dynamite(this);
 		body.space = space;
+	}
+
+	inline public function setVelocity(x:Float, y:Float) {
+		body.velocity.x = x;
+		body.velocity.y = y;
 	}
 
 	public function render(g:Graphics) {

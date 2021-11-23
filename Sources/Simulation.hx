@@ -1,5 +1,12 @@
 package;
 
+import nape.callbacks.OptionType;
+import nape.callbacks.CbType;
+import nape.callbacks.InteractionCallback;
+import nape.callbacks.InteractionType;
+import nape.callbacks.CbEvent;
+import nape.callbacks.InteractionListener;
+import nape.dynamics.InteractionFilter;
 import kha.graphics2.Graphics;
 import nape.shape.Polygon;
 import nape.phys.BodyType;
@@ -18,6 +25,7 @@ class Simulation {
 	var player:Player;
 
 	var dynamite:Array<Dynamite> = [];
+	var bullets:Array<Bullet> = [];
 	var explosions = new ParticleSystem();
 
 	public var camera:Camera;
@@ -62,9 +70,26 @@ class Simulation {
 		dynamite = [];
 		space.clear();
 
+		space.listeners.add(new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Bullet.callbackType, [Grid.tileCallbackType],
+			function(callback:InteractionCallback) {
+				var bullet:Bullet = cast callback.int1.userData.bullet;
+
+				var position = new Vector2(bullet.body.position.x, bullet.body.position.y);
+				var velocity = bullet.body.velocity.copy().normalise().muleq(2);
+				var vx = velocity.x;
+				var vy = velocity.y;
+
+				bullet.body.space = null;
+				bullets.remove(bullet);
+
+				explosion(position, 3, vx, vy);
+			}));
+
 		var walls = new Body(BodyType.STATIC);
 		walls.shapes.add(new Polygon(Polygon.rect(-100, -10000, 100, 1000000)));
 		walls.shapes.add(new Polygon(Polygon.rect(3000, -10000, 100, 1000000)));
+		walls.setShapeFilters(new InteractionFilter(CollisionLayers.LEVEL));
+		walls.cbTypes.add(Grid.levelCallbackType);
 		walls.space = space;
 
 		grid = new Grid(space);
@@ -99,7 +124,8 @@ class Simulation {
 		var napePosition = Vec2.get(position.x, position.y);
 		var explosionForceRadius = force * 20;
 
-		for (body in space.bodiesInCircle(napePosition, explosionForceRadius)) {
+		for (body in space.bodiesInCircle(napePosition, explosionForceRadius, false,
+			new InteractionFilter(CollisionLayers.DYNAMITE | CollisionLayers.PLAYER))) {
 			var deltaVector = body.position.sub(napePosition);
 			deltaVector.length = explosionForceEffect * explosionForceRadius / deltaVector.length;
 			body.applyImpulse(deltaVector);
@@ -169,17 +195,29 @@ class Simulation {
 		}
 
 		if (input.right() && reload <= 0.) {
-			var vector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
-			var d = new Dynamite(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space, dynamiteExplosion);
-			var speed = 600;
-			d.body.velocity.x = vector.x * speed;
-			d.body.velocity.y = vector.y * speed;
-			dynamite.push(d);
+			for (_ in 0...5) {
+				var vector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
+				var angle = Math.atan2(vector.y, vector.x);
+				var variation = Math.PI / 10;
+				angle += (-.5 + Math.random()) * variation;
+				vector = new Vector2(Math.cos(angle), Math.sin(angle));
+
+				var bullet = new Bullet(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space);
+				var speed = 4000 * (.9 + Math.random() * .2);
+				bullet.setVelocity(vector.x * speed, vector.y * speed);
+				bullets.push(bullet);
+			}
+
+			// var d = new Dynamite(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space, dynamiteExplosion);
+			// var speed = 600;
+			// d.setVelocity(vector.x * speed, vector.y * speed);
+			// dynamite.push(d);
 
 			var fireSound = kha.audio1.Audio.play(kha.Assets.sounds.fire);
 			fireSound.volume = .3 + Math.random() * .1;
 
 			reload = 1.3 / dynamiteSpeed;
+			reload = .1;
 		}
 
 		if (input.middle() && laserLevel > 0) {
@@ -244,6 +282,9 @@ class Simulation {
 
 		for (dynamite in dynamite) {
 			dynamite.render(g);
+		}
+		for (bullet in bullets) {
+			bullet.render(g);
 		}
 	}
 }
