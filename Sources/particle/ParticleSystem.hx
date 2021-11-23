@@ -1,5 +1,6 @@
 package particle;
 
+import kha.math.Vector2;
 import kha.graphics2.Graphics;
 
 class ParticleSystem {

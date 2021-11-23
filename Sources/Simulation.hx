@@ -56,7 +56,7 @@ class Simulation {
 		var gravity = Vec2.weak(0, 600);
 		space = new Space(gravity);
 
-		camera = new Camera();
+		camera = new Camera(Grid.width * Grid.tileSize);
 		input = new Input(camera);
 
 		input.onScroll = function(delta) {
@@ -105,7 +105,7 @@ class Simulation {
 	function createWalls() {
 		var walls = new Body(BodyType.STATIC);
 		walls.shapes.add(new Polygon(Polygon.rect(-100, -10000, 100, 1000000)));
-		walls.shapes.add(new Polygon(Polygon.rect(3000, -10000, 100, 1000000)));
+		walls.shapes.add(new Polygon(Polygon.rect(Grid.width * Grid.tileSize, -10000, 100, 1000000)));
 		walls.setShapeFilters(new InteractionFilter(CollisionLayers.LEVEL));
 		walls.cbTypes.add(Grid.levelCallbackType);
 		walls.space = space;
@@ -160,6 +160,9 @@ class Simulation {
 		for (body in space.bodiesInCircle(napePosition, explosionForceRadius, false,
 			new InteractionFilter(CollisionLayers.DYNAMITE | CollisionLayers.PLAYER | CollisionLayers.TILE_DROP))) {
 			var deltaVector = body.position.sub(napePosition);
+			if (deltaVector.length == 0)
+				continue; // Same object - delta to object is zero, applying force is illogical
+
 			deltaVector.length = explosionForceEffect * explosionForceRadius / deltaVector.length;
 			body.applyImpulse(deltaVector);
 		}
@@ -221,12 +224,14 @@ class Simulation {
 			}
 		}
 
-		var directionVector = Vec2.get(input.getMouseWorldPosition().x, input.getMouseWorldPosition().y).sub(player.body.position).muleq(1000);
-		var ray = space.rayCast(Ray.fromSegment(player.body.position, player.body.position.add(directionVector, true)), false,
-			new InteractionFilter(CollisionLayers.TILE));
+		var directionVector = Vec2.get(input.getMouseWorldPosition().x, input.getMouseWorldPosition().y).sub(player.body.position);
+		directionVector.normalise(); // So that rayHitPosition can be found easily later
+		var ray = space.rayCast(new Ray(player.body.position, directionVector), false, new InteractionFilter(null, ~CollisionLayers.TILE_DROP));
+		var rayHitPosition = null;
 
 		if (ray != null) {
 			rayDistance = ray.distance;
+			rayHitPosition = player.body.position.add(directionVector.mul(ray.distance, true));
 		} else {
 			rayDistance = 6000;
 		}
@@ -273,6 +278,8 @@ class Simulation {
 
 			if (ray != null) {
 				if (ray.shape != null && ray.shape.body != null && ray.shape.body.userData != null) {
+					explosion(new Vector2(rayHitPosition.x, rayHitPosition.y), 3, ray.normal.x, ray.normal.y);
+
 					if (ray.shape.body.userData.tile != null) {
 						grid.damage(ray.shape.body.userData.tile.x, ray.shape.body.userData.tile.y, 1 + 2 * laserLevel);
 					}
@@ -292,10 +299,10 @@ class Simulation {
 
 	public function render(g:Graphics) {
 		g.color = kha.Color.fromValue(0xffb4d8f5);
-		g.fillRect(0, -10000, 3000, 10000);
+		g.fillRect(0, -10000, Grid.width * Grid.tileSize, 10000);
 		g.color = kha.Color.White;
 
-		GraphicsHelper.drawImage(g, kha.Assets.images.background, 0, -594, 3000, 594);
+		GraphicsHelper.drawImage(g, kha.Assets.images.background, 0, -594, Grid.width * Grid.tileSize, 594);
 		explosions.render(g);
 		grid.render(g);
 

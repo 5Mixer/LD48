@@ -24,7 +24,7 @@ class Bullet {
 
 		body.shapes.add(new Circle(5));
 		body.setShapeMaterials(nape.phys.Material.glass());
-		body.setShapeFilters(new InteractionFilter(CollisionLayers.BULLET, CollisionLayers.TILE | CollisionLayers.LEVEL));
+		body.setShapeFilters(new InteractionFilter(CollisionLayers.BULLET, CollisionLayers.TILE));
 
 		body.userData.bullet = this;
 		body.cbTypes.add(callbackType);

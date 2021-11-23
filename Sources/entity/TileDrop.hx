@@ -28,7 +28,7 @@ class TileDrop {
 
 		body.shapes.add(new Polygon(Polygon.box(10, 10)));
 		body.setShapeMaterials(nape.phys.Material.glass());
-		body.setShapeFilters(new InteractionFilter(CollisionLayers.TILE_DROP, ~CollisionLayers.TILE_DROP));
+		body.setShapeFilters(new InteractionFilter(CollisionLayers.TILE_DROP));
 
 		body.userData.bullet = this;
 		body.cbTypes.add(callbackType);

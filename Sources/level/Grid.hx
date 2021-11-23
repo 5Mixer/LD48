@@ -14,8 +14,8 @@ import nape.phys.BodyType;
 import nape.shape.Polygon;
 
 class Grid {
-	var width = 150;
-	var height = 4000;
+	public static final width = 400;
+	public static final height = 1000;
 
 	var tiles:Array<Int> = [];
 	var tileHealth:Array<Int> = [];
