@@ -17,6 +17,11 @@ class Main {
 	var upgradeCosts = [1000, 100, 100];
 	var mineNumber = 1;
 
+	var laserButton:Button;
+	var speedButton:Button;
+	var forceButton:Button;
+	var mineButton:Button;
+
 	function new() {
 		System.start({title: "Orbdig", width: 800, height: 600}, function(_) {
 			#if js
@@ -50,66 +55,68 @@ class Main {
 		simulation = new Simulation();
 		buttons = [];
 
-		var laserButton:Button,
-			speedButton:Button,
-			forceButton:Button,
-			mineButton:Button = null;
-
-		laserButton = new Button(200, buttony, "Buy Laser", simulation.input, function() {
-			if (simulation.money > upgradeCosts[0]) {
-				simulation.laserPurchase();
-				simulation.money -= upgradeCosts[0];
-				upgradeCosts[0] *= 2;
-				Audio.play(kha.Assets.sounds.button);
-			}
-			laserButton.mouseOverText = "$" + upgradeCosts[0];
-		});
+		laserButton = new Button(200, buttony, "Buy Laser", simulation.input, onLaserButtonClick);
 		buttons.push(laserButton);
 		laserButton.mouseOverText = "$" + upgradeCosts[0];
 
-		speedButton = new Button(550, buttony, "Upgrade Dynamite Speed", simulation.input, function() {
-			if (simulation.money > upgradeCosts[1]) {
-				simulation.dynamiteSpeedPurchase();
-				simulation.money -= upgradeCosts[1];
-				upgradeCosts[1] *= 2;
-				Audio.play(kha.Assets.sounds.button);
-			}
-			speedButton.mouseOverText = "$" + upgradeCosts[1];
-		});
+		speedButton = new Button(550, buttony, "Upgrade Dynamite Speed", simulation.input, onSpeedButtonClick);
 		buttons.push(speedButton);
 		speedButton.mouseOverText = "$" + upgradeCosts[1];
 
-		forceButton = new Button(900, buttony, "Upgrade Dynamite Force", simulation.input, function() {
-			if (simulation.money > upgradeCosts[2]) {
-				simulation.dynamiteForcePurchase();
-				simulation.money -= upgradeCosts[2];
-				upgradeCosts[2] *= 2;
-				Audio.play(kha.Assets.sounds.button);
-			}
-			forceButton.mouseOverText = "$" + upgradeCosts[2];
-		});
+		forceButton = new Button(900, buttony, "Upgrade Dynamite Force", simulation.input, onForceButtonClick);
 		buttons.push(forceButton);
 		forceButton.mouseOverText = "$" + upgradeCosts[2];
 
-		mineButton = new Button(1250, buttony, "Go to new mine", simulation.input, function() {
-			if (simulation.money > mineNumber * 20000) {
-				simulation.money -= mineNumber * 20000;
+		mineButton = new Button(1250, buttony, "Go to new mine", simulation.input, onMineButtonClick);
 
-				mineNumber++;
-				mineButton.mouseOverText = "$" + (mineNumber * 20) + ",000";
-				Audio.play(kha.Assets.sounds.button);
-
-				var newSimulation = new Simulation();
-				newSimulation.money = simulation.money;
-				newSimulation.laserLevel = simulation.laserLevel;
-				newSimulation.dynamiteForce = simulation.dynamiteForce;
-				newSimulation.dynamiteSpeed = simulation.dynamiteSpeed;
-				simulation.stop();
-				simulation = newSimulation;
-			}
-		});
 		buttons.push(mineButton);
 		mineButton.mouseOverText = "$20,000";
+	}
+
+	function onLaserButtonClick() {
+		if (simulation.money > upgradeCosts[0]) {
+			simulation.laserPurchase();
+			simulation.money -= upgradeCosts[0];
+			upgradeCosts[0] *= 2;
+			Audio.play(kha.Assets.sounds.button);
+		}
+		laserButton.mouseOverText = "$" + upgradeCosts[0];
+	}
+
+	function onSpeedButtonClick() {
+		if (simulation.money > upgradeCosts[1]) {
+			simulation.dynamiteSpeedPurchase();
+			simulation.money -= upgradeCosts[1];
+			upgradeCosts[1] *= 2;
+			Audio.play(kha.Assets.sounds.button);
+		}
+		speedButton.mouseOverText = "$" + upgradeCosts[1];
+	}
+
+	function onForceButtonClick() {
+		if (simulation.money > upgradeCosts[2]) {
+			simulation.dynamiteForcePurchase();
+			simulation.money -= upgradeCosts[2];
+			upgradeCosts[2] *= 2;
+			Audio.play(kha.Assets.sounds.button);
+		}
+		forceButton.mouseOverText = "$" + upgradeCosts[2];
+	}
+
+	function onMineButtonClick() {
+		if (simulation.money > mineNumber * 20000) {
+			simulation.money -= mineNumber * 20000;
+			mineNumber++;
+			mineButton.mouseOverText = "$" + (mineNumber * 20) + ",000";
+			Audio.play(kha.Assets.sounds.button);
+			var newSimulation = new Simulation();
+			newSimulation.money = simulation.money;
+			newSimulation.laserLevel = simulation.laserLevel;
+			newSimulation.dynamiteForce = simulation.dynamiteForce;
+			newSimulation.dynamiteSpeed = simulation.dynamiteSpeed;
+			simulation.stop();
+			simulation = newSimulation;
+		}
 	}
 
 	function update() {
