@@ -1,5 +1,6 @@
-package;
+package entity;
 
+import physics.CollisionLayers;
 import nape.callbacks.CbType;
 import nape.dynamics.InteractionFilter;
 import kha.graphics2.Graphics;
