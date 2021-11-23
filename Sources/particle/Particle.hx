@@ -1,4 +1,4 @@
-package;
+package particle;
 
 import kha.math.Vector2;
 

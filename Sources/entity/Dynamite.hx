@@ -1,5 +1,6 @@
-package;
+package entity;
 
+import physics.CollisionLayers;
 import nape.dynamics.InteractionFilter;
 import kha.graphics2.Graphics;
 import nape.phys.Body;
@@ -26,7 +27,7 @@ class Dynamite {
 
 		body.angularVel = Math.random() * 2 - 1;
 		body.rotation = Math.PI * 2 * Math.random();
-		body.userData.data = BodyData.Dynamite(this);
+		body.userData.dynamite = this;
 		body.space = space;
 	}
 

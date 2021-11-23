@@ -1,5 +1,12 @@
 package;
 
+import entity.Dynamite;
+import entity.Bullet;
+import physics.CollisionLayers;
+import entity.TileDrop;
+import entity.Player;
+import particle.ParticleSystem;
+import level.Grid;
 import nape.callbacks.OptionType;
 import nape.callbacks.CbType;
 import nape.callbacks.InteractionCallback;
@@ -33,9 +40,7 @@ class Simulation {
 	public var input:Input;
 
 	public var money = 0;
-	public var mineralValues = [
-		0, 5, 10, 30, 50, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150
-	]; // Yes, the tiles are out of order. Yes, this is probably the worst code I've ever written.
+	public var mineralValues = [0, 5, 10, 30, 50];
 
 	var audioChannels:Array<AudioChannel> = [];
 	var laserSound:AudioChannel;
@@ -65,54 +70,68 @@ class Simulation {
 	}
 
 	public function initialise() {
-		var w = 6000;
-		var h = 900;
-
 		dynamite = [];
+		drops = [];
+		bullets = [];
+		explosions = new ParticleSystem();
+
 		space.clear();
 
-		space.listeners.add(new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Bullet.callbackType, [Grid.tileCallbackType],
-			function(callback:InteractionCallback) {
-				var bullet:Bullet = cast callback.int1.userData.bullet;
+		createSpaceListeners();
+		createWalls();
+		initialiseGrid();
+		player = new Player(600, -100, space);
+	}
 
-				var position = new Vector2(bullet.body.position.x, bullet.body.position.y);
-				var velocity = bullet.body.velocity.copy().normalise().muleq(2);
-				var vx = velocity.x;
-				var vy = velocity.y;
+	function initialiseGrid() {
+		grid = new Grid(space);
+		grid.tileRemovalCallback = onGridTileRemoval;
+	}
 
-				bullet.body.space = null;
-				bullets.remove(bullet);
+	function onGridTileRemoval(tile, x, y) {
+		money += mineralValues[tile];
 
-				explosion(position, 3, vx, vy);
-			}));
+		if (tile == 0 || Math.random() > .4)
+			return;
 
-		space.listeners.add(new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Player.callbackType, TileDrop.callbackType,
-			function(callback:InteractionCallback) {
-				var drop:TileDrop = cast callback.int2.userData.drop;
+		drops.push(new TileDrop((x + .5) * Grid.tileSize, (y + .5) * Grid.tileSize, tile, space));
+	}
 
-				drop.body.space = null;
-				drops.remove(drop);
-			}));
+	function createSpaceListeners() {
+		space.listeners.add(createBulletTileInteractionListener());
+		space.listeners.add(createPlayerTileDropInteractionListener());
+	}
 
+	function createWalls() {
 		var walls = new Body(BodyType.STATIC);
 		walls.shapes.add(new Polygon(Polygon.rect(-100, -10000, 100, 1000000)));
 		walls.shapes.add(new Polygon(Polygon.rect(3000, -10000, 100, 1000000)));
 		walls.setShapeFilters(new InteractionFilter(CollisionLayers.LEVEL));
 		walls.cbTypes.add(Grid.levelCallbackType);
 		walls.space = space;
+	}
 
-		grid = new Grid(space);
+	function createPlayerTileDropInteractionListener() {
+		return new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Player.callbackType, TileDrop.callbackType, function(callback:InteractionCallback) {
+			var drop:TileDrop = cast callback.int2.userData.drop;
 
-		grid.tileRemovalCallback = function(tile, x, y) {
-			money += mineralValues[tile];
+			drop.body.space = null;
+			drops.remove(drop);
+		});
+	}
 
-			if (tile == 0 || Math.random() > .4)
-				return;
+	function createBulletTileInteractionListener() {
+		return new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Bullet.callbackType, Grid.tileCallbackType, function(callback:InteractionCallback) {
+			var bullet:Bullet = cast callback.int1.userData.bullet;
 
-			drops.push(new TileDrop((x + .5) * Grid.tileSize, (y + .5) * Grid.tileSize, tile, space));
-		}
+			var position = new Vector2(bullet.body.position.x, bullet.body.position.y);
+			var velocity = bullet.body.velocity.copy().normalise().muleq(2);
 
-		player = new Player(600, -100, space);
+			bullet.body.space = null;
+			bullets.remove(bullet);
+
+			explosion(position, 3, velocity.x, velocity.y);
+		});
 	}
 
 	function explosion(position:Vector2, force:Float, vx = 0., vy = 0.) {
@@ -203,7 +222,9 @@ class Simulation {
 		}
 
 		var directionVector = Vec2.get(input.getMouseWorldPosition().x, input.getMouseWorldPosition().y).sub(player.body.position).muleq(1000);
-		var ray = space.rayCast(Ray.fromSegment(player.body.position, player.body.position.add(directionVector, true)));
+		var ray = space.rayCast(Ray.fromSegment(player.body.position, player.body.position.add(directionVector, true)), false,
+			new InteractionFilter(CollisionLayers.TILE));
+
 		if (ray != null) {
 			rayDistance = ray.distance;
 		} else {
@@ -221,9 +242,10 @@ class Simulation {
 		}
 
 		if (input.right() && reload <= 0.) {
+			var vector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
+			var angle = Math.atan2(vector.y, vector.x);
+
 			for (_ in 0...5) {
-				var vector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
-				var angle = Math.atan2(vector.y, vector.x);
 				var variation = Math.PI / 10;
 				angle += (-.5 + Math.random()) * variation;
 				vector = new Vector2(Math.cos(angle), Math.sin(angle));
@@ -234,10 +256,10 @@ class Simulation {
 				bullets.push(bullet);
 			}
 
-			// var d = new Dynamite(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space, dynamiteExplosion);
-			// var speed = 600;
-			// d.setVelocity(vector.x * speed, vector.y * speed);
-			// dynamite.push(d);
+			var d = new Dynamite(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space, dynamiteExplosion);
+			var speed = 600;
+			d.setVelocity(vector.x * speed, vector.y * speed);
+			dynamite.push(d);
 
 			var fireSound = kha.audio1.Audio.play(kha.Assets.sounds.fire);
 			fireSound.volume = .3 + Math.random() * .1;
@@ -250,16 +272,12 @@ class Simulation {
 			laserSound.volume = 1;
 
 			if (ray != null) {
-				if (ray.shape != null && ray.shape.body != null && ray.shape.body.userData != null && ray.shape.body.userData.data != null) {
-					switch (cast(ray.shape.body.userData.data, BodyData)) {
-						case Tile(x, y):
-							{
-								grid.damage(x, y, 1 + 2 * laserLevel);
-							}
-						case Dynamite(laserDynamite):
-							{
-								laserDynamite.explode();
-							}
+				if (ray.shape != null && ray.shape.body != null && ray.shape.body.userData != null) {
+					if (ray.shape.body.userData.tile != null) {
+						grid.damage(ray.shape.body.userData.tile.x, ray.shape.body.userData.tile.y, 1 + 2 * laserLevel);
+					}
+					if (ray.shape.body.userData.dynamite != null) {
+						ray.shape.body.userData.dynamite.explode();
 					}
 				}
 			}

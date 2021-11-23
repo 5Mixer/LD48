@@ -1,5 +1,6 @@
-package;
+package level;
 
+import physics.CollisionLayers;
 import nape.callbacks.CbType;
 import nape.dynamics.InteractionFilter;
 import kha.math.FastVector2;
@@ -122,7 +123,8 @@ class Grid {
 
 	function makeBody(x, y) {
 		var body = new Body(BodyType.STATIC);
-		body.userData.data = BodyData.Tile(x, y);
+		body.userData.tile = {x: x, y: y};
+
 		body.cbTypes.add(tileCallbackType);
 		body.shapes.add(new Polygon(Polygon.rect(x * tileSize, y * tileSize, tileSize, tileSize)));
 		body.setShapeFilters(new InteractionFilter(CollisionLayers.TILE));

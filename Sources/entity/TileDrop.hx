@@ -1,6 +1,6 @@
-package;
+package entity;
 
-import kha.Scheduler;
+import physics.CollisionLayers;
 import kha.math.FastMatrix3;
 import nape.shape.Polygon;
 import nape.callbacks.CbType;
