@@ -1,18 +1,15 @@
 package particle;
 
-import kha.math.Vector2;
 import kha.graphics2.Graphics;
+
+using kha.graphics2.GraphicsExtension;
 
 class ParticleSystem {
 	var particles:Array<Particle> = [];
-	var deadParticles:Array<Particle> = [];
 
 	public function new() {}
 
 	function getParticle() {
-		if (deadParticles.length > 0) {
-			return deadParticles.pop();
-		}
 		var newParticle = new Particle();
 		particles.push(newParticle);
 		return newParticle;
@@ -25,6 +22,7 @@ class ParticleSystem {
 			var p = getParticle();
 			p.position.x = x;
 			p.position.y = y;
+			p.gradient = kha.Assets.images.explosion_gradient;
 			p.size = 1 + Math.floor(Math.random() * 6);
 			p.velocity.x = Math.cos(angle) * speed / p.size + vx;
 			p.velocity.y = Math.sin(angle) * speed / p.size + vy;
@@ -33,11 +31,22 @@ class ParticleSystem {
 		}
 	}
 
+	public function trail(x, y) {
+		var p = getParticle();
+		p.position.x = x;
+		p.position.y = y;
+		p.gradient = kha.Assets.images.trail_gradient;
+		p.size = 6;
+		p.velocity.x = 0;
+		p.velocity.y = 0;
+		p.life = 0;
+		p.lifetime = .1;
+	}
+
 	public function update(delta:Float) {
 		for (particle in particles) {
 			if (particle.life > particle.lifetime) {
 				particles.remove(particle);
-				deadParticles.push(particle);
 				continue;
 			}
 			particle.position.x += particle.velocity.x;
@@ -52,7 +61,10 @@ class ParticleSystem {
 
 	public function render(g:Graphics) {
 		for (particle in particles) {
-			GraphicsHelper.drawParticle(g, particle.position.x, particle.position.y, particle.life / particle.lifetime, particle.size);
+			var life = particle.life / particle.lifetime;
+			g.color = particle.gradient.at(Math.floor(life * 100), 0);
+			g.fillCircle(particle.position.x, particle.position.y, particle.size * Math.abs(1.1 - life));
+			g.color = kha.Color.White;
 		}
 	}
 }

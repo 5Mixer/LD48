@@ -1,5 +1,6 @@
 package entity;
 
+import nape.geom.Vec2;
 import physics.CollisionLayers;
 import nape.callbacks.CbType;
 import nape.dynamics.InteractionFilter;
@@ -14,10 +15,15 @@ class Bullet {
 
 	public static var callbackType = new CbType();
 
+	public var life:Float = 0;
+
+	public var lastBodyPosition:Vec2; // An optimisation for trails that caches the physics work (rather than reintegrating)
+
 	public function new(x:Float, y:Float, space:Space) {
 		body = new Body(BodyType.DYNAMIC);
 
 		body.position.setxy(x, y);
+		lastBodyPosition = Vec2.get(x, y);
 		body.isBullet = true;
 		body.mass = 0.00001;
 		body.allowRotation = false;
@@ -37,7 +43,21 @@ class Bullet {
 		body.velocity.y = y;
 	}
 
+	var movementAngle = 0.;
+
+	public function update(delta:Float) {
+		life += delta;
+		movementAngle = body.position.sub(lastBodyPosition).angle;
+	}
+
 	public function render(g:Graphics) {
-		GraphicsHelper.drawImage(g, kha.Assets.images.bullet, body.position.x - 5, body.position.y - 5, 10, 10, body.rotation);
+		var tangentx = Math.cos(movementAngle + Math.PI / 2) * 5;
+		var tangenty = Math.sin(movementAngle + Math.PI / 2) * 5;
+		g.fillTriangle(body.position.x + tangentx, body.position.y + tangenty, body.position.x - tangentx, body.position.y - tangenty, lastBodyPosition.x,
+			lastBodyPosition.y);
+
+		g.drawScaledImage(kha.Assets.images.bullet, body.position.x - 5, body.position.y - 5, 10, 10);
+		lastBodyPosition.x = body.position.x;
+		lastBodyPosition.y = body.position.y;
 	}
 }

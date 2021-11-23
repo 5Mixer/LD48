@@ -9,6 +9,7 @@ class Particle {
 	public var life:Float = 0;
 	public var lifetime:Float = 0;
 	public var colour:kha.Color = kha.Color.White;
+	public var gradient:kha.Image;
 
 	public function new() {}
 }

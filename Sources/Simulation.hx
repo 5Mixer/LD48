@@ -6,9 +6,8 @@ import physics.CollisionLayers;
 import entity.TileDrop;
 import entity.Player;
 import particle.ParticleSystem;
+import particle.TrailParticleSystem;
 import level.Grid;
-import nape.callbacks.OptionType;
-import nape.callbacks.CbType;
 import nape.callbacks.InteractionCallback;
 import nape.callbacks.InteractionType;
 import nape.callbacks.CbEvent;
@@ -35,6 +34,7 @@ class Simulation {
 	var drops:Array<TileDrop> = [];
 	var bullets:Array<Bullet> = [];
 	var explosions = new ParticleSystem();
+	var trails = new TrailParticleSystem();
 
 	public var camera:Camera;
 	public var input:Input;
@@ -213,14 +213,32 @@ class Simulation {
 		reload -= delta;
 
 		for (drop in drops) {
-			// var deltaVector = player.body.position.sub(drop.body.position);
-			// deltaVector.muleq(10 / deltaVector.length);
-			// drop.body.applyImpulse(deltaVector);
-
 			drop.age += delta;
 			if (drop.age >= drop.deathAge) {
 				drops.remove(drop);
 				drop.body.space = null;
+			}
+		}
+
+		for (bullet in bullets) {
+			var deltaVector = bullet.body.position.sub(bullet.lastBodyPosition);
+
+			// final particles = 2;
+			// for (i in 0...particles) {
+			// 	trails.trail(bullet.body.position.x
+			// 		- deltaVector.x * (i / particles), bullet.body.position.y
+			// 		- deltaVector.y * (i / particles),
+			// 		bullet.body.position.x
+			// 		- deltaVector.x * (i + 1) / particles, bullet.body.position.y
+			// 		- deltaVector.y * (i + 1) / particles,
+			// 		i / particles * 1 / 60);
+			// }
+
+			bullet.update(delta);
+
+			if (bullet.life > 2) {
+				bullet.body.space = null;
+				bullets.remove(bullet);
 			}
 		}
 
@@ -295,6 +313,7 @@ class Simulation {
 		player.update(delta, input);
 		grid.update();
 		explosions.update(delta);
+		trails.update(delta);
 	}
 
 	public function render(g:Graphics) {
@@ -304,6 +323,7 @@ class Simulation {
 
 		GraphicsHelper.drawImage(g, kha.Assets.images.background, 0, -594, Grid.width * Grid.tileSize, 594);
 		explosions.render(g);
+		trails.render(g);
 		grid.render(g);
 
 		if (input.middle() && laserLevel > 0) {

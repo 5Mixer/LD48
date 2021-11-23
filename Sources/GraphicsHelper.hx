@@ -24,12 +24,6 @@ class GraphicsHelper {
 		g.color = kha.Color.White;
 	}
 
-	public static function drawParticle(g:Graphics, x:Float, y:Float, life:Float, size:Float) {
-		g.color = kha.Assets.images.explosion_gradient.at(Math.floor(life * 100), 0);
-		g.fillCircle(x, y, size * Math.abs(1.1 - life));
-		g.color = kha.Color.White;
-	}
-
 	public static function drawLaser(g:Graphics, x, y, angle, distance:Float) {
 		g.drawLine(x, y, x + Math.cos(angle) * distance, y + Math.sin(angle) * distance);
 		var width = 10;
