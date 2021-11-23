@@ -1,7 +1,7 @@
 package;
 
+import kha.math.FastVector2;
 import kha.math.Vector2i;
-import kha.math.FastMatrix3;
 import kha.math.Vector2;
 import kha.graphics2.Graphics;
 import hxnoise.Perlin;
@@ -12,7 +12,7 @@ import nape.shape.Polygon;
 
 class Grid {
 	var width = 150;
-	var height = 400;
+	var height = 4000;
 
 	var tiles:Array<Int> = [];
 	var tileHealth:Array<Int> = [];
@@ -78,8 +78,15 @@ class Grid {
 		g.mipmapScaleQuality = Low;
 		g.imageScaleQuality = Low;
 
-		for (x in 0...width) {
-			for (y in 0...height) {
+		var transformInverse = g.transformation.inverse();
+		var topLeftFrustrum = transformInverse.multvec(new FastVector2());
+		var bottomRightFrustrum = transformInverse.multvec(new FastVector2(kha.Window.get(0).width, kha.Window.get(0).height));
+
+		var topLeftTileFrustrum = new Vector2i(Math.floor(topLeftFrustrum.x / tileSize), Math.floor(topLeftFrustrum.y / tileSize));
+		var bottomRightTileFrustrum = new Vector2i(Math.ceil(bottomRightFrustrum.x / tileSize), Math.ceil(bottomRightFrustrum.y / tileSize));
+
+		for (x in topLeftTileFrustrum.x...bottomRightTileFrustrum.x) {
+			for (y in topLeftTileFrustrum.y...bottomRightTileFrustrum.y) {
 				if (getTile(x, y) != 0) {
 					drawTile(g, x, y, getTile(x, y) - 1);
 
@@ -110,7 +117,7 @@ class Grid {
 	}
 
 	public static function drawTile(g:Graphics, x:Int, y:Int, tile) {
-		g.drawScaledSubImage(kha.Assets.images.tile, tile * 100, 0, 100, 100, x * tileSize, y * tileSize, tileSize, tileSize);
+		g.drawScaledSubImage(kha.Assets.images.tile, tile * 125, 0, 100, 100, x * tileSize, y * tileSize, tileSize, tileSize);
 	}
 
 	function makeBody(x, y) {
