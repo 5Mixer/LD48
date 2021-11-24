@@ -146,6 +146,13 @@ class Main {
 			button.render(g);
 		}
 
+		final healthBarWidth = 400;
+		final healthBarHeight = 30;
+		g.color = kha.Color.fromBytes(226, 229, 234);
+		g.fillRect(10, 10, healthBarWidth, healthBarHeight);
+		g.color = kha.Color.fromBytes(170, 61, 61);
+		g.fillRect(10, 10, healthBarWidth * (simulation.player.health / simulation.player.maxHealth), healthBarHeight);
+
 		g.end();
 	}
 

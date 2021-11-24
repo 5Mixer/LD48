@@ -1,5 +1,6 @@
 package entity;
 
+import entity.util.DamageColour;
 import nape.geom.Vec2;
 import kha.math.Vector2;
 import nape.phys.Material;
@@ -19,9 +20,13 @@ class Spikey {
 
 	public var target:Vector2;
 
-	var health = 100;
-	final radius = 50;
+	public var health = 3000;
 
+	public var damage = 5;
+
+	var damageColour = new DamageColour();
+
+	final radius = 50;
 	var maxVelocity = 700 + Math.random() * 400;
 
 	public function new(x:Float, y:Float, space:Space) {
@@ -35,21 +40,33 @@ class Spikey {
 		body.setShapeFilters(new InteractionFilter(CollisionLayers.ENEMY));
 		body.space = space;
 
+		body.userData.spikey = this;
+
 		body.cbTypes.add(callbackType);
 	}
 
 	public function render(g:Graphics) {
+		g.color = damageColour.getColour();
 		GraphicsHelper.drawImage(g, kha.Assets.images.spikey, body.position.x - radius / 2, body.position.y - radius / 2, radius, radius, body.rotation);
+		g.color = kha.Color.White;
+	}
+
+	public function receiveDamage(damage:Int) {
+		health -= damage;
+		damageColour.damage();
 	}
 
 	public function update(delta:Float) {
+		damageColour.update(delta);
+
 		if (target != null) {
 			var impulse = target.sub(new Vector2(body.position.x, body.position.y));
 			impulse.length = Math.max(2, Math.min(impulse.length / 30, 10));
 			impulse.length = 4;
 			body.applyImpulse(Vec2.weak(impulse.x, impulse.y));
 		}
-		if (body.velocity.length > maxVelocity)
+		if (body.velocity.length > maxVelocity) {
 			body.velocity.length = maxVelocity;
+		}
 	}
 }

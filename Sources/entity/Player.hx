@@ -1,5 +1,6 @@
 package entity;
 
+import entity.util.DamageColour;
 import physics.CollisionLayers;
 import nape.callbacks.CbType;
 import nape.dynamics.InteractionFilter;
@@ -22,7 +23,12 @@ class Player {
 
 	var flyingVolume = .3;
 
+	public var health = 10000;
+	public var maxHealth = 10000;
+
 	public static var callbackType = new CbType();
+
+	var damageColour = new DamageColour();
 
 	public function new(x:Float, y:Float, space:Space) {
 		body = new Body(BodyType.DYNAMIC);
@@ -33,6 +39,8 @@ class Player {
 		body.setShapeFilters(new InteractionFilter(CollisionLayers.PLAYER));
 		body.space = space;
 
+		body.userData.player = this;
+
 		body.cbTypes.add(callbackType);
 
 		flyingSound = kha.audio1.Audio.play(kha.Assets.sounds.flying, true);
@@ -42,10 +50,17 @@ class Player {
 	public function render(g:Graphics) {
 		visualRotation -= (lastBodyRotation - body.rotation) * .3;
 		visualRotation *= .9;
+		g.color = damageColour.getColour();
 		GraphicsHelper.drawImage(g, kha.Assets.images.player_bg, body.position.x - 30, body.position.y - 30, 60, 60, body.rotation);
 		GraphicsHelper.drawImage(g, kha.Assets.images.player_fg, body.position.x - 30, body.position.y - 30, 60, 60, visualRotation);
+		g.color = kha.Color.White;
 
 		lastBodyRotation = body.rotation;
+	}
+
+	public function damage(damage:Int) {
+		health -= damage;
+		damageColour.damage();
 	}
 
 	public function getPosition() {
@@ -58,6 +73,7 @@ class Player {
 			impulse.length = Math.max(500, Math.min(impulse.length / 2, 800));
 			body.applyImpulse(Vec2.weak(impulse.x, impulse.y));
 		}
+		damageColour.update(delta);
 
 		flyingSound.volume = (9 * flyingSound.volume + (input.left() ? flyingVolume : 0)) / 10;
 	}

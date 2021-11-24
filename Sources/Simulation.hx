@@ -29,7 +29,7 @@ class Simulation {
 	var space:Space;
 	var grid:Grid;
 
-	var player:Player;
+	public var player:Player;
 
 	var dynamite:Array<Dynamite> = [];
 	var drops:Array<TileDrop> = [];
@@ -107,6 +107,7 @@ class Simulation {
 	function createSpaceListeners() {
 		space.listeners.add(createBulletTileInteractionListener());
 		space.listeners.add(createPlayerTileDropInteractionListener());
+		space.listeners.add(createPlayerEnemyInteractionListener());
 	}
 
 	function createWalls() {
@@ -128,16 +129,29 @@ class Simulation {
 	}
 
 	function createBulletTileInteractionListener() {
-		return new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Bullet.callbackType, Grid.tileCallbackType, function(callback:InteractionCallback) {
-			var bullet:Bullet = cast callback.int1.userData.bullet;
+		return new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Bullet.callbackType, [Grid.tileCallbackType, Spikey.callbackType],
+			function(callback:InteractionCallback) {
+				var bullet:Bullet = cast callback.int1.userData.bullet;
 
-			var position = new Vector2(bullet.body.position.x, bullet.body.position.y);
-			var velocity = bullet.body.velocity.copy().normalise().muleq(2);
+				var position = new Vector2(bullet.body.position.x, bullet.body.position.y);
+				var velocity = bullet.body.velocity.copy().normalise().muleq(2);
 
-			bullet.body.space = null;
-			bullets.remove(bullet);
+				bullet.body.space = null;
+				bullets.remove(bullet);
 
-			explosion(position, 3, velocity.x, velocity.y);
+				explosion(position, 3, velocity.x, velocity.y);
+			});
+	}
+
+	function createPlayerEnemyInteractionListener() {
+		return new InteractionListener(CbEvent.ONGOING, InteractionType.ANY, Player.callbackType, Spikey.callbackType, function(callback:InteractionCallback) {
+			if (callback.int2.userData.spikey == null)
+				return;
+
+			var player:Player = cast callback.int1.userData.player;
+			var spikey:Spikey = cast callback.int2.userData.spikey;
+
+			player.damage(spikey.damage);
 		});
 	}
 
@@ -165,13 +179,21 @@ class Simulation {
 		var explosionForceRadius = force * 20;
 
 		for (body in space.bodiesInCircle(napePosition, explosionForceRadius, false,
-			new InteractionFilter(CollisionLayers.DYNAMITE | CollisionLayers.PLAYER | CollisionLayers.TILE_DROP))) {
+			new InteractionFilter(CollisionLayers.DYNAMITE | CollisionLayers.PLAYER | CollisionLayers.TILE_DROP | CollisionLayers.ENEMY))) {
 			var deltaVector = body.position.sub(napePosition);
 			if (deltaVector.length == 0)
 				continue; // Same object - delta to object is zero, applying force is illogical
 
 			deltaVector.length = explosionForceEffect * explosionForceRadius / deltaVector.length;
 			body.applyImpulse(deltaVector);
+			if (body.userData.spikey != null) {
+				var spikey = cast(body.userData.spikey, entity.Spikey);
+				spikey.receiveDamage(Math.round(deltaVector.length));
+				if (spikey.health <= 0) {
+					spikey.body.space = null;
+					spikeys.remove(spikey);
+				}
+			}
 		}
 		napePosition.dispose();
 	}
