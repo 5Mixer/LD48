@@ -118,18 +118,20 @@ class Grid {
 
 		for (x in topLeftTileFrustrum.x...bottomRightTileFrustrum.x) {
 			for (y in topLeftTileFrustrum.y...bottomRightTileFrustrum.y) {
-				if (getTile(x, y) != 0) {
+				var tile = getTile(x, y);
+				if (tile != 0) {
 					var leftEmpty = getTile(x - 1, y) == 0;
 					var rightEmpty = getTile(x + 1, y) == 0;
 					var aboveEmpty = getTile(x, y - 1) == 0;
 					var belowEmpty = getTile(x, y + 1) == 0;
+
 					var removeTopLeft = leftEmpty && aboveEmpty;
 					var removeBottomLeft = leftEmpty && belowEmpty;
 					var removeTopRight = rightEmpty && aboveEmpty;
 					var removeBottomRight = rightEmpty && belowEmpty;
 					var variant = (removeTopLeft ? 1 << 0 : 0) | (removeTopRight ? 1 << 1 : 0) | (removeBottomRight ? 1 << 2 : 0) | (removeBottomLeft ? 1 << 3 : 0);
 
-					drawTile(g, x, y, getTile(x, y) - 1, variant);
+					drawTile(g, x, y, tile - 1, variant);
 				}
 			}
 		}

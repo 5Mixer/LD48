@@ -1,5 +1,10 @@
 package level;
 
+import kha.graphics4.BlendingFactor;
+import kha.graphics4.VertexStructure;
+import kha.graphics4.PipelineState;
+import kha.graphics4.VertexData;
+import kha.Shaders;
 import kha.Assets;
 
 class TileTextureGenerator {
@@ -49,7 +54,20 @@ class TileTextureGenerator {
 		var variants = 1 << 4;
 		renderTexture = kha.Image.createRenderTarget(width * tileSize, variants * tileSize);
 
-		renderTexture.g2.begin();
+		renderTexture.g2.begin(true, kha.Color.Transparent);
+		renderTexture.g2.imageScaleQuality = Low;
+		renderTexture.g2.mipmapScaleQuality = Low;
+
+		var tileIndex = 0;
+		for (tile in tiles) {
+			for (variant in 0...variants) {
+				// Draw base texture
+				renderTexture.g2.drawSubImage(Assets.images.tile, tileIndex * tileSize, variant * tileSize, tile.baseTexture * 125, 0, 100, 100);
+			}
+			tileIndex++;
+		}
+
+		renderTexture.g2.pipeline = createMaskPipeline();
 
 		var tileIndex = 0;
 		for (tile in tiles) {
@@ -58,9 +76,6 @@ class TileTextureGenerator {
 				var removeTopRight = (variant & 1 << 1) != 0;
 				var removeBottomRight = (variant & 1 << 2) != 0;
 				var removeBottomLeft = (variant & 1 << 3) != 0;
-
-				// Draw base texture
-				renderTexture.g2.drawSubImage(Assets.images.tile, tileIndex * tileSize, variant * tileSize, tile.baseTexture * 125, 0, 100, 100);
 
 				if (removeTopLeft)
 					renderTexture.g2.drawSubImage(Assets.images.tileMasks, tileIndex * tileSize, variant * tileSize, 0, 0, 50, 50);
@@ -76,5 +91,26 @@ class TileTextureGenerator {
 		}
 
 		renderTexture.g2.end();
+	}
+
+	function createMaskPipeline() {
+		var pipeline = new PipelineState();
+		var structure = new VertexStructure();
+		structure.add("vertexPosition", VertexData.Float3);
+		structure.add("vertexUV", VertexData.Float2);
+		structure.add("vertexColor", VertexData.Float4);
+		pipeline.inputLayout = [structure];
+		pipeline.vertexShader = Shaders.painter_image_vert;
+		pipeline.fragmentShader = Shaders.painter_image_frag;
+
+		pipeline.blendSource = BlendingFactor.BlendZero;
+		pipeline.blendDestination = BlendingFactor.InverseSourceAlpha;
+
+		pipeline.alphaBlendSource = BlendingFactor.SourceAlpha;
+		pipeline.alphaBlendDestination = BlendingFactor.InverseSourceAlpha;
+		pipeline.alphaBlendOperation = ReverseSubtract;
+
+		pipeline.compile();
+		return pipeline;
 	}
 }
