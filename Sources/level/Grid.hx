@@ -18,6 +18,7 @@ class Grid {
 	public static final height = 1000;
 
 	var tiles:Array<Int> = [];
+	var light:Array<Float> = [];
 	var tileHealth:Array<Int> = [];
 	var bodies:Array<Body> = [];
 	var space:Space;
@@ -88,15 +89,55 @@ class Grid {
 					tile = 8;
 					health = 1;
 				}
+				light.push(tile == 0 ? 1 : 0);
 
 				tileHealth.push(health);
 				tiles.push(tile);
 				bodies.push(null);
 			}
 		}
+
+		updateLight();
+
 		this.space = space;
 
 		constructShapes();
+	}
+
+	var lightRadius = 12;
+	var lightChange = .004;
+
+	public function updateLight() {
+		light = [];
+		for (x in 0...width) {
+			for (y in 0...height) {
+				light.push(getTile(x, y) == 0 ? 1 : 0);
+			}
+		}
+		var radius = lightRadius;
+		for (x in radius...width - radius * 2) {
+			for (y in radius...height - radius * 2) {
+				if (getTile(x, y) == 0) {
+					for (dx in -radius...radius) {
+						for (dy in -radius...radius) {
+							light[(x + dx) * height + y + dy] = Math.min(1,
+								light[(x + dx) * height + y + dy] + lightChange / Math.sqrt(dx * dx + dy * dy) * radius);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public function updateLightAroundPoint(x, y) {
+		var radius = lightRadius;
+		for (dx in -radius...radius) {
+			for (dy in -radius...radius) {
+				if (x + dx < 0 || y + dy < 0 || x + dx > width || y + dy > height)
+					continue;
+				light[(x + dx) * height + y + dy] = Math.min(1, light[(x + dx) * height + y + dy] + lightChange * radius / Math.sqrt(dx * dx + dy * dy));
+			}
+		}
 	}
 
 	public function worldPositionToTilePosition(worldPosition:Vector2) {
@@ -131,10 +172,13 @@ class Grid {
 					var removeBottomRight = rightEmpty && belowEmpty;
 					var variant = (removeTopLeft ? 1 << 0 : 0) | (removeTopRight ? 1 << 1 : 0) | (removeBottomRight ? 1 << 2 : 0) | (removeBottomLeft ? 1 << 3 : 0);
 
+					var light = getLight(x, y);
+					g.color = kha.Color.fromFloats(light, light, light);
 					drawTile(g, x, y, tile - 1, variant);
 				}
 			}
 		}
+		g.color = kha.Color.White;
 		g.mipmapScaleQuality = High;
 		g.imageScaleQuality = High;
 	}
@@ -186,6 +230,8 @@ class Grid {
 		if (y < height - 1 && unsafeGetTile(x, y + 1) != 0 && unsafeGetBody(x, y + 1) == null) {
 			makeBody(x, y + 1);
 		}
+
+		updateLightAroundPoint(x, y);
 	}
 
 	public inline function unsafeGetTile(x, y) {
@@ -211,5 +257,11 @@ class Grid {
 		if (x < 0 || y < 0 || x >= width || y >= height)
 			return 0;
 		return tiles[x * height + y];
+	}
+
+	public function getLight(x, y):Float {
+		if (x < 0 || y < 0 || x >= width || y >= height)
+			return 0.;
+		return light[x * height + y];
 	}
 }

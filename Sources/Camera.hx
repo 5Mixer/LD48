@@ -48,7 +48,8 @@ class Camera {
 	}
 
 	public function getTransformation() {
-		return FastMatrix3.translation(-(position.x), -(position.y)).multmat(FastMatrix3.scale(scale, scale));
+		return FastMatrix3.translation(-Math.round(position.x), -Math.round(position.y))
+			.multmat(FastMatrix3.scale(Math.round(scale * 100) / 100, Math.round(scale * 100) / 100));
 	}
 
 	public function transform(g:Graphics) {

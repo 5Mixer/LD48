@@ -38,7 +38,7 @@ class Simulation {
 	public var input:Input;
 
 	public var money = 0;
-	public var mineralValues = [0, 5, 10, 30, 50, 1, 1, 1];
+	public var mineralValues = [0, 5, 10, 30, 50, 1, 1, 1, 1, 1, 1, 1];
 
 	var audioChannels:Array<AudioChannel> = [];
 	var laserSound:AudioChannel;
