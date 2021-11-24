@@ -1,5 +1,6 @@
 package;
 
+import level.Tiles;
 import entity.Dynamite;
 import entity.Bullet;
 import physics.CollisionLayers;
@@ -38,7 +39,6 @@ class Simulation {
 	public var input:Input;
 
 	public var money = 0;
-	public var mineralValues = [0, 5, 10, 30, 50, 1, 1, 1, 1, 1, 1, 1];
 
 	var audioChannels:Array<AudioChannel> = [];
 	var laserSound:AudioChannel;
@@ -87,7 +87,7 @@ class Simulation {
 	}
 
 	function onGridTileRemoval(tile, x, y) {
-		money += mineralValues[tile];
+		money += Tiles.data[tile - 1].value;
 
 		if (tile == 0 || Math.random() > .4)
 			return;

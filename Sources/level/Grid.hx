@@ -41,11 +41,9 @@ class Grid {
 		for (x in 0...width) {
 			for (y in 0...height) {
 				var tile = 1;
-				var health = 10;
 
-				var air = m_diamondSquare.OctavePerlin(x / tileSize, y / tileSize, seed, 4, 0.5, 0.6);
+				var air = m_diamondSquare.OctavePerlin(x / 20, y / 20, seed, 4, 0.5, 0.6);
 				var mineralA = m_diamondSquare.OctavePerlin(x / 10, y / 3, seed + 1000, 3, 0.5, 0.25);
-				var mineralB = m_diamondSquare.OctavePerlin(x / 4, y / 4, seed + 2000, 3, 0.5, 0.25);
 				var mineralC = m_diamondSquare.OctavePerlin(x / 2, y / 2, seed + 3000, 3, 0.5, 0.25);
 				var dirtVariant = m_diamondSquare.OctavePerlin(x / 3, y / 3, seed + 4000, 3, 0.5, 0.25);
 
@@ -56,42 +54,34 @@ class Grid {
 
 				if (mineralA < .3) {
 					tile = 2;
-					health = 20;
 				}
-				if (mineralB < .3) {
+				if (mineralA > .7) {
 					tile = 3;
-					health = 50;
 				}
 				if (mineralC < .3) {
 					tile = 4;
-					health = 80;
 				}
 				if (air < .45) {
 					tile = 0;
-					health = 0;
 				}
 
 				var landy:Int = 10 + Math.floor(land * 30);
 				var dirty:Int = 10 + Math.floor(dirt * 30);
 				if (y < landy + 20) {
 					tile = dirtVariant < .5 ? 5 : 7;
-					health = 10;
 				}
 				if (y < dirty + 6) {
 					tile = 6;
-					health = 5;
 				}
 				if (y < landy) {
 					tile = 0;
-					health = 0;
 				}
 				if (y == landy - 1 && Math.random() < .1) {
 					tile = 8;
-					health = 1;
 				}
 				light.push(tile == 0 ? 1 : 0);
 
-				tileHealth.push(health);
+				tileHealth.push(tile == 0 ? 0 : Tiles.data[tile - 1].health);
 				tiles.push(tile);
 				bodies.push(null);
 			}

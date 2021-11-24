@@ -11,45 +11,7 @@ class TileTextureGenerator {
 	public var renderTexture:kha.Image;
 
 	public function new() {
-		var tiles = [
-			{
-				name: 'stone',
-				baseTexture: 0
-			},
-			{
-				name: 'stoneDark',
-				baseTexture: 1
-			},
-			{
-				name: 'iron',
-				baseTexture: 2
-			},
-			{
-				name: 'gold',
-				baseTexture: 3
-			},
-			{
-				name: 'copper',
-				baseTexture: 4
-			},
-			{
-				name: 'dirt',
-				baseTexture: 5
-			},
-			{
-				name: 'grass',
-				baseTexture: 6
-			},
-			{
-				name: 'dirtDark',
-				baseTexture: 7
-			},
-			{
-				name: 'plant',
-				baseTexture: 8
-			}
-		];
-		var width = tiles.length;
+		var width = Tiles.data.length;
 		var tileSize = 100;
 		var variants = 1 << 4;
 		renderTexture = kha.Image.createRenderTarget(width * tileSize, variants * tileSize);
@@ -59,7 +21,7 @@ class TileTextureGenerator {
 		renderTexture.g2.mipmapScaleQuality = Low;
 
 		var tileIndex = 0;
-		for (tile in tiles) {
+		for (tile in Tiles.data) {
 			for (variant in 0...variants) {
 				// Draw base texture
 				renderTexture.g2.drawSubImage(Assets.images.tile, tileIndex * tileSize, variant * tileSize, tile.baseTexture * 125, 0, 100, 100);
@@ -70,7 +32,7 @@ class TileTextureGenerator {
 		renderTexture.g2.pipeline = createMaskPipeline();
 
 		var tileIndex = 0;
-		for (tile in tiles) {
+		for (_ in Tiles.data) {
 			for (variant in 0...variants) {
 				var removeTopLeft = (variant & 1 << 0) != 0;
 				var removeTopRight = (variant & 1 << 1) != 0;
