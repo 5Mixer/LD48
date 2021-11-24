@@ -1,5 +1,6 @@
 package;
 
+import entity.Spikey;
 import level.Tiles;
 import entity.Dynamite;
 import entity.Bullet;
@@ -33,6 +34,9 @@ class Simulation {
 	var dynamite:Array<Dynamite> = [];
 	var drops:Array<TileDrop> = [];
 	var bullets:Array<Bullet> = [];
+
+	var spikeys:Array<Spikey> = [];
+
 	var explosions = new ParticleSystem();
 
 	public var camera:Camera;
@@ -79,6 +83,11 @@ class Simulation {
 		createWalls();
 		initialiseGrid();
 		player = new Player(600, -100, space);
+
+		spikeys = [];
+		for (_ in 0...40) {
+			spikeys.push(new Spikey(Math.random() * 500, Math.random() * 200 - 200, space));
+		}
 	}
 
 	function initialiseGrid() {
@@ -296,6 +305,13 @@ class Simulation {
 		}
 
 		player.update(delta, input);
+
+		var target = new Vector2(player.body.position.x, player.body.position.y);
+		for (spikey in spikeys) {
+			spikey.target = target;
+			spikey.update(delta);
+		}
+
 		grid.update();
 		explosions.update(delta);
 	}
@@ -312,6 +328,10 @@ class Simulation {
 		if (input.middle() && laserLevel > 0) {
 			GraphicsHelper.drawLaser(g, player.body.position.x, player.body.position.y,
 				Math.atan2(input.getMouseWorldPosition().y - player.body.position.y, input.getMouseWorldPosition().x - player.body.position.x), rayDistance);
+		}
+
+		for (spikey in spikeys) {
+			spikey.render(g);
 		}
 
 		player.render(g);

@@ -1,7 +1,6 @@
 package;
 
 import ui.Button;
-import js.html.EventListener;
 import kha.audio1.Audio;
 import kha.graphics2.ImageScaleQuality;
 import kha.Assets;
