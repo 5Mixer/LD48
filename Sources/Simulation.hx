@@ -6,7 +6,6 @@ import physics.CollisionLayers;
 import entity.TileDrop;
 import entity.Player;
 import particle.ParticleSystem;
-import particle.TrailParticleSystem;
 import level.Grid;
 import nape.callbacks.InteractionCallback;
 import nape.callbacks.InteractionType;

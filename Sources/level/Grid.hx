@@ -29,9 +29,13 @@ class Grid {
 
 	public var tileRemovalCallback:(tile:Int, x:Int, y:Int) -> Void;
 
+	var tileTextures:TileTextureGenerator;
+
 	public function new(space) {
 		var m_diamondSquare = new Perlin();
 		var seed = Math.random() * 100000;
+
+		tileTextures = new TileTextureGenerator();
 
 		for (x in 0...width) {
 			for (y in 0...height) {
@@ -115,27 +119,17 @@ class Grid {
 		for (x in topLeftTileFrustrum.x...bottomRightTileFrustrum.x) {
 			for (y in topLeftTileFrustrum.y...bottomRightTileFrustrum.y) {
 				if (getTile(x, y) != 0) {
-					drawTile(g, x, y, getTile(x, y) - 1, 0);
+					var leftEmpty = getTile(x - 1, y) == 0;
+					var rightEmpty = getTile(x + 1, y) == 0;
+					var aboveEmpty = getTile(x, y - 1) == 0;
+					var belowEmpty = getTile(x, y + 1) == 0;
+					var removeTopLeft = leftEmpty && aboveEmpty;
+					var removeBottomLeft = leftEmpty && belowEmpty;
+					var removeTopRight = rightEmpty && aboveEmpty;
+					var removeBottomRight = rightEmpty && belowEmpty;
+					var variant = (removeTopLeft ? 1 << 0 : 0) | (removeTopRight ? 1 << 1 : 0) | (removeBottomRight ? 1 << 2 : 0) | (removeBottomLeft ? 1 << 3 : 0);
 
-					if (getTile(x, y - 1) == 0) {
-						drawTile(g, x, y, 4, 2);
-					}
-					if (getTile(x, y + 1) == 0) {
-						drawTile(g, x, y, 5, 2);
-					}
-
-					if (getTile(x, y + 1) == 0 && getTile(x - 1, y) == 0) {
-						drawTile(g, x, y, 0, 2);
-					}
-					if (getTile(x, y - 1) == 0 && getTile(x - 1, y) == 0) {
-						drawTile(g, x, y, 1, 2);
-					}
-					if (getTile(x, y - 1) == 0 && getTile(x + 1, y) == 0) {
-						drawTile(g, x, y, 2, 2);
-					}
-					if (getTile(x, y + 1) == 0 && getTile(x + 1, y) == 0) {
-						drawTile(g, x, y, 3, 2);
-					}
+					drawTile(g, x, y, getTile(x, y) - 1, variant);
 				}
 			}
 		}
@@ -143,8 +137,8 @@ class Grid {
 		g.imageScaleQuality = High;
 	}
 
-	public static function drawTile(g:Graphics, x:Int, y:Int, tilex:Int, tiley:Int) {
-		g.drawScaledSubImage(kha.Assets.images.tile, tilex * 125, tiley * 125, 100, 100, x * tileSize, y * tileSize, tileSize, tileSize);
+	public function drawTile(g:Graphics, x:Int, y:Int, tile:Int, variant:Int) {
+		g.drawScaledSubImage(tileTextures.renderTexture, tile * 100, variant * 100, 100, 100, x * tileSize, y * tileSize, tileSize, tileSize);
 	}
 
 	function makeBody(x, y) {
