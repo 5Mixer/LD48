@@ -1,5 +1,7 @@
 package;
 
+import ui.Hotbar;
+import inventory.Inventory;
 import entity.Spikey;
 import level.Tiles;
 import entity.Dynamite;
@@ -31,6 +33,8 @@ class Simulation {
 
 	public var player:Player;
 
+	var inventory:Inventory;
+
 	var dynamite:Array<Dynamite> = [];
 	var drops:Array<TileDrop> = [];
 	var bullets:Array<Bullet> = [];
@@ -41,6 +45,8 @@ class Simulation {
 
 	public var camera:Camera;
 	public var input:Input;
+
+	var hotbar:Hotbar;
 
 	public var money = 0;
 
@@ -77,6 +83,9 @@ class Simulation {
 		bullets = [];
 		explosions = new ParticleSystem();
 
+		inventory = new Inventory();
+		hotbar = new Hotbar(inventory);
+
 		space.clear();
 
 		createSpaceListeners();
@@ -97,6 +106,9 @@ class Simulation {
 
 	function onGridTileRemoval(tile, x, y) {
 		money += Tiles.data[tile - 1].value;
+
+		var droppedItem = Tiles.data[tile - 1].drops;
+		inventory.addItem(droppedItem, 1);
 
 		if (tile == 0 || Math.random() > .4)
 			return;
@@ -339,6 +351,7 @@ class Simulation {
 	}
 
 	public function render(g:Graphics) {
+		camera.transform(g);
 		g.color = kha.Color.fromValue(0xffb4d8f5);
 		g.fillRect(0, -10000, Grid.width * Grid.tileSize, 10000);
 		g.color = kha.Color.White;
@@ -385,5 +398,7 @@ class Simulation {
 		for (bullet in bullets) {
 			bullet.render(g);
 		}
+		camera.reset(g);
+		hotbar.render(g);
 	}
 }

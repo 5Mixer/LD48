@@ -135,9 +135,7 @@ class Main {
 		g.mipmapScaleQuality = ImageScaleQuality.High;
 
 		g.begin(true, kha.Color.fromValue(0x0d1219));
-		simulation.camera.transform(g);
 		simulation.render(g);
-		simulation.camera.reset(g);
 		g.fontSize = 50;
 		g.font = kha.Assets.fonts.BebasNeue_Regular;
 		g.drawString("$" + simulation.money, buttony, 100);
