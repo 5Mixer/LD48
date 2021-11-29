@@ -260,7 +260,7 @@ class Simulation {
 
 		var directionVector = Vec2.get(input.getMouseWorldPosition().x, input.getMouseWorldPosition().y).sub(player.body.position);
 		directionVector.normalise(); // So that rayHitPosition can be found easily later
-		var ray = space.rayCast(new Ray(player.body.position, directionVector), false, new InteractionFilter(null, ~CollisionLayers.TILE_DROP));
+		var ray = space.rayCast(new Ray(player.body.position, directionVector), false, new InteractionFilter(1, ~CollisionLayers.TILE_DROP));
 		var rayHitPosition = null;
 
 		if (ray != null) {
