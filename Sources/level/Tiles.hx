@@ -22,16 +22,8 @@ class Tiles {
 			drops: Stone
 		},
 		{
-			name: 'stoneDark',
-			baseTexture: 1,
-			solid: true,
-			value: 10,
-			health: 10,
-			drops: Stone
-		},
-		{
 			name: 'iron',
-			baseTexture: 2,
+			baseTexture: 1,
 			solid: true,
 			value: 30,
 			health: 20,
@@ -39,7 +31,7 @@ class Tiles {
 		},
 		{
 			name: 'gold',
-			baseTexture: 3,
+			baseTexture: 2,
 			solid: true,
 			value: 50,
 			health: 40,
@@ -47,7 +39,7 @@ class Tiles {
 		},
 		{
 			name: 'copper',
-			baseTexture: 4,
+			baseTexture: 3,
 			solid: true,
 			value: 60,
 			health: 60,
@@ -55,7 +47,7 @@ class Tiles {
 		},
 		{
 			name: 'dirt',
-			baseTexture: 5,
+			baseTexture: 4,
 			solid: true,
 			value: 1,
 			health: 1,
@@ -63,7 +55,7 @@ class Tiles {
 		},
 		{
 			name: 'grass',
-			baseTexture: 6,
+			baseTexture: 5,
 			solid: true,
 			value: 1,
 			health: 1,
@@ -71,7 +63,7 @@ class Tiles {
 		},
 		{
 			name: 'dirtDark',
-			baseTexture: 7,
+			baseTexture: 6,
 			solid: true,
 			value: 1,
 			health: 1,
@@ -79,11 +71,19 @@ class Tiles {
 		},
 		{
 			name: 'plant',
-			baseTexture: 8,
+			baseTexture: 7,
 			solid: false,
 			value: 1,
 			health: 1,
 			drops: Grass
-		}
+		},
+		{
+			name: 'stoneDark',
+			baseTexture: 8,
+			solid: true,
+			value: 10,
+			health: 10,
+			drops: Stone
+		},
 	];
 }

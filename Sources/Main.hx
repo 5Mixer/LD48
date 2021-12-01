@@ -141,7 +141,7 @@ class Main {
 		g.drawString("$" + simulation.money, buttony, 100);
 
 		for (button in buttons) {
-			button.render(g);
+			// button.render(g);
 		}
 
 		final healthBarWidth = 400;
