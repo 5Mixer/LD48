@@ -68,13 +68,18 @@ class Player {
 	}
 
 	public function update(delta:Float, input:Input) {
-		if (input.left()) {
+		if (input.shouldMove()) {
+			#if kha_android_native
+			var impulse = input.getMovementVector();
+			#else
 			var impulse = input.getMouseWorldPosition().sub(new Vector2(body.position.x, body.position.y));
-			impulse.length = Math.max(500, Math.min(impulse.length / 2, 800));
+			impulse = impulse.normalized();
+			#end
+			impulse.length *= 500;
 			body.applyImpulse(Vec2.weak(impulse.x, impulse.y));
 		}
 		damageColour.update(delta);
 
-		flyingSound.volume = (9 * flyingSound.volume + (input.left() ? flyingVolume : 0)) / 10;
+		flyingSound.volume = (9 * flyingSound.volume + (input.shouldMove() ? flyingVolume : 0)) / 10;
 	}
 }

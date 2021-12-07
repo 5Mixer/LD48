@@ -1,5 +1,7 @@
 package;
 
+import kha.Window;
+import ui.Touchpad;
 import ui.Button;
 import kha.audio1.Audio;
 import kha.graphics2.ImageScaleQuality;
@@ -20,6 +22,9 @@ class Main {
 	var speedButton:Button;
 	var forceButton:Button;
 	var mineButton:Button;
+
+	var movementTouchpad:Touchpad;
+	var actionTouchpad:Touchpad;
 
 	function new() {
 		System.start({title: "Orbdig", width: 800, height: 600}, function(_) {
@@ -52,6 +57,13 @@ class Main {
 
 	function init() {
 		simulation = new Simulation();
+
+		movementTouchpad = new Touchpad();
+		actionTouchpad = new Touchpad();
+
+		simulation.input.movementTouchpad = movementTouchpad;
+		simulation.input.actionTouchpad = actionTouchpad;
+
 		buttons = [];
 
 		laserButton = new Button(200, buttony, "Buy Laser", simulation.input, onLaserButtonClick);
@@ -70,6 +82,12 @@ class Main {
 
 		buttons.push(mineButton);
 		mineButton.mouseOverText = "$20,000";
+	}
+
+	function positionTouchpads() {
+		movementTouchpad.screenPosition.y = actionTouchpad.screenPosition.y = Window.get(0).height - 160;
+		movementTouchpad.screenPosition.x = 160;
+		actionTouchpad.screenPosition.x = Window.get(0).width - 160;
 	}
 
 	function onLaserButtonClick() {
@@ -125,6 +143,8 @@ class Main {
 		canvas.height = js.Browser.window.innerHeight;
 		#end
 
+		positionTouchpads();
+
 		simulation.update(Scheduler.time() - lastTime);
 		lastTime = Scheduler.time();
 	}
@@ -150,6 +170,9 @@ class Main {
 		g.fillRect(10, 10, healthBarWidth, healthBarHeight);
 		g.color = kha.Color.fromBytes(170, 61, 61);
 		g.fillRect(10, 10, healthBarWidth * (simulation.player.health / simulation.player.maxHealth), healthBarHeight);
+
+		movementTouchpad.render(g);
+		actionTouchpad.render(g);
 
 		g.end();
 	}

@@ -1,5 +1,6 @@
 package;
 
+import ui.Touchpad;
 import kha.input.KeyCode;
 import kha.input.Keyboard;
 import kha.input.Mouse;
@@ -20,6 +21,9 @@ class Input {
 	public var onScroll:(Int) -> Void;
 	public var downKeys:Array<KeyCode> = [];
 
+	public var movementTouchpad:Touchpad;
+	public var actionTouchpad:Touchpad;
+
 	public function new(camera) {
 		this.camera = camera;
 
@@ -34,16 +38,24 @@ class Input {
 		mousePosition = new Vector2();
 	}
 
-	public function left() {
+	public function shouldMove() {
+		#if kha_android_native
+		return movementTouchpad.isDown();
+		#else
 		return leftMouseButtonDown || downKeys.contains(KeyCode.Q);
+		#end
 	}
 
 	public function middle() {
 		return middleMouseButtonDown || downKeys.contains(KeyCode.W);
 	}
 
-	public function right() {
+	public function shouldDoAction() {
+		#if kha_android_native
+		return actionTouchpad.isDown();
+		#else
 		return rightMouseButtonDown || downKeys.contains(KeyCode.E);
+		#end
 	}
 
 	function onMouseDown(button:Int, x:Int, y:Int) {
@@ -90,6 +102,14 @@ class Input {
 
 	function onMouseWheel(delta:Int) {
 		onScroll(delta);
+	}
+
+	public function getMovementVector() {
+		return movementTouchpad.getVector();
+	}
+
+	public function getActionVector() {
+		return actionTouchpad.getVector();
 	}
 
 	public function getMouseWorldPosition():kha.math.Vector2 {

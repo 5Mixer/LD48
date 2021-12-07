@@ -43,8 +43,8 @@ class Hotbar {
 	function getQuantityAsApproximateString(quantity:Int) {
 		if (quantity < 1000) {
 			return '$quantity';
-		} else if (quantity < 100000) {
-			return Math.round(quantity / 1000 * 100) / 100 + "k";
+		} else if (quantity < 10000) {
+			return Math.round(quantity / 10) * 10 / 1000 + "k";
 		} else if (quantity < 1000000) {
 			return Math.round(quantity / 1000 * 10) / 10 + "k";
 		} else if (quantity < 1000000000) {

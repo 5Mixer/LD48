@@ -1,5 +1,6 @@
 package;
 
+import nape.geom.RayResult;
 import ui.Hotbar;
 import inventory.Inventory;
 import entity.Spikey;
@@ -269,19 +270,6 @@ class Simulation {
 				bullets.remove(bullet);
 			}
 		}
-
-		var directionVector = Vec2.get(input.getMouseWorldPosition().x, input.getMouseWorldPosition().y).sub(player.body.position);
-		directionVector.normalise(); // So that rayHitPosition can be found easily later
-		var ray = space.rayCast(new Ray(player.body.position, directionVector), false, new InteractionFilter(1, ~CollisionLayers.TILE_DROP));
-		var rayHitPosition = null;
-
-		if (ray != null) {
-			rayDistance = ray.distance;
-			rayHitPosition = player.body.position.add(directionVector.mul(ray.distance, true));
-		} else {
-			rayDistance = 6000;
-		}
-
 		for (audioChannel in audioChannels) {
 			if (audioChannel.finished) {
 				audioChannels.remove(audioChannel);
@@ -292,11 +280,15 @@ class Simulation {
 			dynamite.update(delta);
 		}
 
-		if (input.right() && reload <= 0.) {
+		if (input.shouldDoAction() && reload <= 0.) {
+			#if kha_android_native
+			var vector = input.getActionVector();
+			#else
 			var vector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
+			#end
 			var angle = Math.atan2(vector.y, vector.x);
 
-			for (_ in 0...5) {
+			for (_ in 0...1) {
 				var variation = Math.PI / 10;
 				angle += (-.5 + Math.random()) * variation;
 				vector = new Vector2(Math.cos(angle), Math.sin(angle));
@@ -316,26 +308,44 @@ class Simulation {
 			fireSound.volume = .3 + Math.random() * .1;
 
 			reload = 1.3 / dynamiteSpeed;
-			reload = .1;
+			reload = .2;
 		}
 
-		if (input.middle() && laserLevel > 0) {
-			laserSound.volume = 1;
+		#if kha_android_native
+		var directionVector = Vec2.get(input.getMovementVector().x, input.getMovementVector().y);
+		#else
+		var directionVector = Vec2.get(input.getMouseWorldPosition().x, input.getMouseWorldPosition().y).sub(player.body.position);
+		#end
+		if (directionVector.length != 0) {
+			directionVector.normalise(); // So that rayHitPosition can be found easily later
+			var ray = space.rayCast(new Ray(player.body.position, directionVector), false, new InteractionFilter(1, ~CollisionLayers.TILE_DROP));
+			var rayHitPosition = null;
 
 			if (ray != null) {
-				if (ray.shape != null && ray.shape.body != null && ray.shape.body.userData != null) {
-					explosion(new Vector2(rayHitPosition.x, rayHitPosition.y), 3, ray.normal.x, ray.normal.y);
+				rayDistance = ray.distance;
+				rayHitPosition = player.body.position.add(directionVector.mul(ray.distance, true));
 
-					if (ray.shape.body.userData.tile != null) {
-						grid.damage(ray.shape.body.userData.tile.x, ray.shape.body.userData.tile.y, 1 + 2 * laserLevel);
+				if (input.middle() && laserLevel > 0) {
+					laserSound.volume = 1;
+
+					if (ray != null) {
+						if (ray.shape != null && ray.shape.body != null && ray.shape.body.userData != null) {
+							explosion(new Vector2(rayHitPosition.x, rayHitPosition.y), 3, ray.normal.x, ray.normal.y);
+
+							if (ray.shape.body.userData.tile != null) {
+								grid.damage(ray.shape.body.userData.tile.x, ray.shape.body.userData.tile.y, 1 + 2 * laserLevel);
+							}
+							if (ray.shape.body.userData.dynamite != null) {
+								ray.shape.body.userData.dynamite.explode();
+							}
+						}
 					}
-					if (ray.shape.body.userData.dynamite != null) {
-						ray.shape.body.userData.dynamite.explode();
-					}
+				} else {
+					laserSound.volume *= .6;
 				}
+			} else {
+				rayDistance = 6000;
 			}
-		} else {
-			laserSound.volume *= .6;
 		}
 
 		player.update(delta, input);
@@ -361,8 +371,13 @@ class Simulation {
 		grid.render(g);
 
 		if (input.middle() && laserLevel > 0) {
+			#if kha_android_native
+			GraphicsHelper.drawLaser(g, player.body.position.x, player.body.position.y, Math.atan2(input.getActionVector().y, input.getActionVector().x),
+				rayDistance);
+			#else
 			GraphicsHelper.drawLaser(g, player.body.position.x, player.body.position.y,
 				Math.atan2(input.getMouseWorldPosition().y - player.body.position.y, input.getMouseWorldPosition().x - player.body.position.x), rayDistance);
+			#end
 		}
 
 		for (spikey in spikeys) {
@@ -371,20 +386,24 @@ class Simulation {
 
 		player.render(g);
 
+		#if kha_android_native
+		var turretVector = input.getMovementVector();
+		#else
 		var turretVector = input.getMouseWorldPosition().sub(new Vector2(player.body.position.x, player.body.position.y)).normalized();
+		#end
 		if (laserLevel > 0) {
 			GraphicsHelper.drawImage(g, kha.Assets.images.laser_attachment, player.body.position.x - 40, player.body.position.y - 40, 80, 80,
 				Math.atan2(turretVector.y, turretVector.x));
 		}
 
-		if (input.left())
+		if (input.shouldMove())
 			GraphicsHelper.drawImage(g, kha.Assets.images.jet_attachment, player.body.position.x
 				- 40, player.body.position.y
 				- 40, 80, 80,
 				Math.PI
 				+ Math.atan2(turretVector.y, turretVector.x));
 
-		if (input.left() && player.body.velocity.length > 1) {
+		if (input.shouldMove() && player.body.velocity.length > 1) {
 			var jetVector = turretVector.mult(-20 * (.8 + .4 * Math.random()));
 			explosions.explode(player.body.position.x, player.body.position.y, 10, jetVector.x, jetVector.y);
 		}
