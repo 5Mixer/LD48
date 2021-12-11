@@ -25,7 +25,7 @@ class Bullet {
 		body.position.setxy(x, y);
 		lastBodyPosition = Vec2.get(x, y);
 		body.isBullet = true;
-		body.mass = 0.00001;
+		body.mass = 0.001;
 		body.allowRotation = false;
 
 		body.shapes.add(new Circle(5));

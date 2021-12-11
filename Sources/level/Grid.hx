@@ -121,7 +121,6 @@ class Grid {
 
 				tile = generationData.get((x * width + y) * 4);
 
-				// light.push(tile == 0 ? 1 : 0);
 				tileHealth.push(tile == 0 ? 0 : Tiles.data[tile - 1].health);
 
 				tiles.push(tile);
@@ -174,26 +173,6 @@ class Grid {
 	}
 
 	public function update() {
-		while (removedTiles.length > 0) {
-			var removedTile = removedTiles.pop();
-			var x = removedTile.x;
-			var y = removedTile.y;
-
-			if (x > 0 && unsafeGetTile(x - 1, y) != 0 && unsafeGetBody(x - 1, y) == null) {
-				makeBody(x - 1, y);
-			}
-			if (x < width - 1 && unsafeGetTile(x + 1, y) != 0 && unsafeGetBody(x + 1, y) == null) {
-				makeBody(x + 1, y);
-			}
-			if (y > 0 && unsafeGetTile(x, y - 1) != 0 && unsafeGetBody(x, y - 1) == null) {
-				makeBody(x, y - 1);
-			}
-			if (y < height - 1 && unsafeGetTile(x, y + 1) != 0 && unsafeGetBody(x, y + 1) == null) {
-				makeBody(x, y + 1);
-			}
-
-			// bodies[x * height + y].setShapeFilters(new InteractionFilter(0)); //Interesting possible optimisation avenue
-		}
 		// updateLight();
 	}
 
@@ -254,11 +233,11 @@ class Grid {
 	public function damage(x, y, damage) {
 		tileHealth[x * height + y] -= damage;
 		if (tileHealth[x * height + y] <= 0) {
-			remove(x, y);
+			removeWithoutPhysicsLightUpdate(x, y);
 		}
 	}
 
-	public function remove(x, y) {
+	public function removeWithoutPhysicsLightUpdate(x, y) {
 		if (x < 0 || y < 0 || x >= width || y >= height || tiles[x * height + y] == 0)
 			return;
 
@@ -266,16 +245,25 @@ class Grid {
 		tiles[x * height + y] = 0;
 
 		if (bodies[x * height + y] != null) {
-			bodies[x * height + y].space = null;
-			bodies[x * height + y] = null;
-			// bodies[x * height + y].setShapeFilters(new InteractionFilter(0)); // Interesting possible optimisation avenue
+			// bodies[x * height + y].space = null;
+			// bodies[x * height + y] = null;
+			bodies[x * height + y].setShapeFilters(new InteractionFilter(0)); // Interesting possible optimisation avenue
 		}
+	}
 
-		if (getTile(x - 1, y) != 0 || getTile(x + 1, y) != 0 || getTile(x, y - 1) != 0 || getTile(x, y + 1) != 0) {
-			removedTiles.push(new Vector2i(x, y));
+	public function processChangedRegion(minX:Int, minY:Int, maxX:Int, maxY:Int) {
+		lightImage.g2.begin(false);
+		for (x in minX - 1...maxX + 1) {
+			for (y in minY - 1...maxY + 1) {
+				if (getTile(x, y) == 0) {
+					lightImage.g2.drawImage(kha.Assets.images.light, x - 8, y - 8);
+				} else if (unsafeGetBody(x, y) == null
+					&& (getTile(x - 1, y) == 0 || getTile(x + 1, y) == 0 || getTile(x, y - 1) == 0 || getTile(x, y + 1) == 0)) {
+					makeBody(x, y);
+				}
+			}
 		}
-
-		updateLightAroundPoint(x, y);
+		lightImage.g2.end();
 	}
 
 	public inline function unsafeGetTile(x, y) {
@@ -301,12 +289,6 @@ class Grid {
 		if (x < 0 || y < 0 || x >= width || y >= height)
 			return 0;
 		return tiles[x * height + y];
-	}
-
-	public function getLight(x, y):Float {
-		if (x < 0 || y < 0 || x >= width || y >= height)
-			return 0.;
-		return light[x * height + y];
 	}
 
 	function createLightingPipeline() {

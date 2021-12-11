@@ -111,10 +111,10 @@ class Simulation {
 		var droppedItem = Tiles.data[tile - 1].drops;
 		inventory.addItem(droppedItem, 1);
 
-		if (tile == 0 || Math.random() > .4)
-			return;
+		// if (tile == 0 || Math.random() > .4)
+		// 	return;
 
-		drops.push(new TileDrop((x + .5) * Grid.tileSize, (y + .5) * Grid.tileSize, tile, space));
+		// drops.push(new TileDrop((x + .5) * Grid.tileSize, (y + .5) * Grid.tileSize, tile, space));
 	}
 
 	function createSpaceListeners() {
@@ -152,7 +152,7 @@ class Simulation {
 				bullet.body.space = null;
 				bullets.remove(bullet);
 
-				explosion(position, 5, velocity.x, velocity.y);
+				explosion(position, 30, velocity.x, velocity.y);
 			});
 	}
 
@@ -169,7 +169,7 @@ class Simulation {
 	}
 
 	function explosion(position:Vector2, force:Float, vx = 0., vy = 0.) {
-		explosions.explode(position.x, position.y, Math.round(90 * force), vx, vy);
+		explosions.explode(position.x, position.y, Math.round(10 * force), vx, vy);
 
 		var forceSquared = force * force / 4;
 
@@ -185,6 +185,7 @@ class Simulation {
 				}
 			}
 		}
+		grid.processChangedRegion(x - Math.floor(force / 2), y - Math.floor(force / 2), x + Math.ceil(force / 2), y + Math.ceil(force / 2));
 
 		var explosionForceEffect = 40;
 
@@ -192,7 +193,7 @@ class Simulation {
 		var explosionForceRadius = force * 20;
 
 		for (body in space.bodiesInCircle(napePosition, explosionForceRadius, false,
-			new InteractionFilter(CollisionLayers.DYNAMITE | CollisionLayers.PLAYER | CollisionLayers.TILE_DROP | CollisionLayers.ENEMY))) {
+			new InteractionFilter(1, CollisionLayers.DYNAMITE | CollisionLayers.PLAYER | CollisionLayers.TILE_DROP | CollisionLayers.ENEMY))) {
 			var deltaVector = body.position.sub(napePosition);
 			if (deltaVector.length == 0)
 				continue; // Same object - delta to object is zero, applying force is illogical
