@@ -152,7 +152,7 @@ class Simulation {
 				bullet.body.space = null;
 				bullets.remove(bullet);
 
-				explosion(position, 3, velocity.x, velocity.y);
+				explosion(position, 5, velocity.x, velocity.y);
 			});
 	}
 
@@ -289,7 +289,7 @@ class Simulation {
 			var angle = Math.atan2(vector.y, vector.x);
 
 			for (_ in 0...1) {
-				var variation = Math.PI / 10;
+				var variation = .1;
 				angle += (-.5 + Math.random()) * variation;
 				vector = new Vector2(Math.cos(angle), Math.sin(angle));
 
@@ -299,16 +299,16 @@ class Simulation {
 				bullets.push(bullet);
 			}
 
-			var d = new Dynamite(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space, dynamiteExplosion);
-			var speed = 600;
-			d.setVelocity(vector.x * speed, vector.y * speed);
-			dynamite.push(d);
+			/*var d = new Dynamite(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space, dynamiteExplosion);
+				var speed = 600;
+				d.setVelocity(vector.x * speed, vector.y * speed);
+				dynamite.push(d); */
 
 			var fireSound = kha.audio1.Audio.play(kha.Assets.sounds.fire);
 			fireSound.volume = .3 + Math.random() * .1;
 
 			reload = 1.3 / dynamiteSpeed;
-			reload = .2;
+			reload = .07;
 		}
 
 		#if kha_android_native

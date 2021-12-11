@@ -33,22 +33,33 @@ class Grid {
 	var tileTextures:TileTextureGenerator;
 
 	public function new(space) {
+		var start = Scheduler.realTime();
 		var m_diamondSquare = new Perlin();
 		var seed = Math.random() * 100000;
 
 		tileTextures = new TileTextureGenerator();
+		var gpuGenerator = new GpuGenerator(width, height);
+		var generationData = gpuGenerator.generate();
 
 		for (x in 0...width) {
 			for (y in 0...height) {
 				var tile = 1;
 
-				var air = m_diamondSquare.OctavePerlin(x / 20, y / 20, seed, 4, 0.5, 0.6);
-				var mineralA = m_diamondSquare.OctavePerlin(x / 10, y / 3, seed + 1000, 3, 0.5, 0.25);
-				var mineralC = m_diamondSquare.OctavePerlin(x / 2, y / 2, seed + 3000, 3, 0.5, 0.25);
-				var dirtVariant = m_diamondSquare.OctavePerlin(x / 3, y / 3, seed + 4000, 3, 0.5, 0.25);
+				/*var air = kha.Assets.images.noise.at(x, y).R;
+					var mineralA = kha.Assets.images.noise.at(x, y).G;
+					var mineralC = kha.Assets.images.noise.at(x, y).B;
+					var dirtVariant = kha.Assets.images.noise.at(x, y).A;
 
-				var land = m_diamondSquare.OctavePerlin(x / 10, 0, seed, 3, 0.5, 0.25);
-				var dirt = m_diamondSquare.OctavePerlin(x / 10, 1, seed, 3, 0.5, 0.25);
+					var land = kha.Assets.images.noise.at(x, 0).A;
+					var dirt = kha.Assets.images.noise.at(x, 1).A;
+
+					// var air = m_diamondSquare.OctavePerlin(x / 20, y / 20, seed, 2, 0.5, 0.6);
+					// 	var mineralA = m_diamondSquare.OctavePerlin(x / 10, y / 3, seed + 1000, 2, 0.5, 0.25);
+					// 	var mineralC = m_diamondSquare.OctavePerlin(x / 2, y / 2, seed + 3000, 2, 0.5, 0.25);
+					// 	var dirtVariant = m_diamondSquare.OctavePerlin(x / 3, y / 3, seed + 4000, 2, 0.5, 0.25);
+
+					// 	var land = m_diamondSquare.OctavePerlin(x / 10, 0, seed, 1, 0.5, 0.25);
+					// 	var dirt = m_diamondSquare.OctavePerlin(x / 10, 1, seed, 1, 0.5, 0.25);
 
 				tile = dirtVariant < .5 ? 1 : 9;
 
@@ -78,8 +89,9 @@ class Grid {
 				}
 				if (y == landy - 1 && Math.random() < .1) {
 					tile = 8;
-				}
-				light.push(tile == 0 ? 1 : 0);
+				}*/
+
+				tile = generationData.get((x * width + y) * 4);
 
 				tileHealth.push(tile == 0 ? 0 : Tiles.data[tile - 1].health);
 				tiles.push(tile);
@@ -87,11 +99,20 @@ class Grid {
 			}
 		}
 
+		var tileTime = Scheduler.realTime();
+
 		updateLight();
+
+		var lightTime = Scheduler.realTime();
 
 		this.space = space;
 
 		constructShapes();
+
+		var shapeTime = Scheduler.realTime();
+
+		trace("Level generation timing");
+		trace('tiles: ${tileTime - start}, lights: ${lightTime - tileTime}, shapes: ${shapeTime - lightTime}. Total: ${shapeTime - start}');
 	}
 
 	var lightRadius = 12;
