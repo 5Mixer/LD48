@@ -71,9 +71,10 @@ class ParticleSystem {
 		g.pipeline = pipeline;
 		for (particle in particles) {
 			var life = particle.life / particle.lifetime;
-			g.color = particle.gradient.at(Math.floor(life * 100), 0);
+			// g.color = particle.gradient.at(Math.floor(life * 100), 0);
+			g.color = kha.Color.fromFloats(.9, .5, .1);
 			var size = particle.size * Math.abs(1.1 - life);
-			g.drawScaledImage(kha.Assets.images.explosion_particle, particle.position.x, particle.position.y, size, size);
+			g.drawScaledImage(kha.Assets.images.explosion_particle, particle.position.x - size, particle.position.y - size, size * 2, size * 2);
 			g.color = kha.Color.White;
 		}
 		g.pipeline = null;

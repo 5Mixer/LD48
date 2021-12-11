@@ -1,5 +1,12 @@
 package level;
 
+import kha.graphics4.PipelineState;
+import kha.graphics4.BlendingFactor;
+import kha.Shaders;
+import kha.graphics4.VertexData;
+import kha.graphics4.VertexStructure;
+import kha.Image;
+import kha.Scheduler;
 import physics.CollisionLayers;
 import nape.callbacks.CbType;
 import nape.dynamics.InteractionFilter;
@@ -13,9 +20,22 @@ import nape.phys.Body;
 import nape.phys.BodyType;
 import nape.shape.Polygon;
 
+class TileBodyData {
+	public var x:Int;
+	public var y:Int;
+
+	public function new(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+}
+
 class Grid {
-	public static final width = 400;
+	public static final width = 1000;
 	public static final height = 1000;
+
+	var lightImage:kha.Image;
+	var lightingPipeline:PipelineState;
 
 	var tiles:Array<Int> = [];
 	var light:Array<Float> = [];
@@ -23,8 +43,12 @@ class Grid {
 	var bodies:Array<Body> = [];
 	var space:Space;
 
+	var removedTiles:Array<Vector2i> = []; // Reprocess removed tile bodies once on update(), as otherwise large removals cause many unneeded [create -> delete]
+
 	public static var tileCallbackType = new CbType();
 	public static var levelCallbackType = new CbType();
+
+	var tileShapeFilter = new InteractionFilter(CollisionLayers.TILE);
 
 	public static final tileSize = 20;
 
@@ -34,8 +58,12 @@ class Grid {
 
 	public function new(space) {
 		var start = Scheduler.realTime();
+		lightImage = Image.createRenderTarget(width, height);
+
 		var m_diamondSquare = new Perlin();
 		var seed = Math.random() * 100000;
+
+		lightingPipeline = createLightingPipeline();
 
 		tileTextures = new TileTextureGenerator();
 		var gpuGenerator = new GpuGenerator(width, height);
@@ -61,39 +89,41 @@ class Grid {
 					// 	var land = m_diamondSquare.OctavePerlin(x / 10, 0, seed, 1, 0.5, 0.25);
 					// 	var dirt = m_diamondSquare.OctavePerlin(x / 10, 1, seed, 1, 0.5, 0.25);
 
-				tile = dirtVariant < .5 ? 1 : 9;
+					tile = dirtVariant < .5 ? 1 : 9;
 
-				if (mineralA < .3) {
-					tile = 2;
-				}
-				if (mineralA > .7) {
-					tile = 3;
-				}
-				if (mineralC < .3) {
-					tile = 4;
-				}
-				if (air < .45) {
-					tile = 0;
-				}
+					if (mineralA < .3) {
+						tile = 2;
+					}
+					if (mineralA > .7) {
+						tile = 3;
+					}
+					if (mineralC < .3) {
+						tile = 4;
+					}
+					if (air < .45) {
+						tile = 0;
+					}
 
-				var landy:Int = 10 + Math.floor(land * 30);
-				var dirty:Int = 10 + Math.floor(dirt * 30);
-				if (y < landy + 20) {
-					tile = dirtVariant < .5 ? 5 : 7;
-				}
-				if (y < dirty + 6) {
-					tile = 6;
-				}
-				if (y < landy) {
-					tile = 0;
-				}
-				if (y == landy - 1 && Math.random() < .1) {
-					tile = 8;
+					var landy:Int = 10 + Math.floor(land * 30);
+					var dirty:Int = 10 + Math.floor(dirt * 30);
+					if (y < landy + 20) {
+						tile = dirtVariant < .5 ? 5 : 7;
+					}
+					if (y < dirty + 6) {
+						tile = 6;
+					}
+					if (y < landy) {
+						tile = 0;
+					}
+					if (y == landy - 1 && Math.random() < .1) {
+						tile = 8;
 				}*/
 
 				tile = generationData.get((x * width + y) * 4);
 
+				// light.push(tile == 0 ? 1 : 0);
 				tileHealth.push(tile == 0 ? 0 : Tiles.data[tile - 1].health);
+
 				tiles.push(tile);
 				bodies.push(null);
 			}
@@ -119,43 +149,53 @@ class Grid {
 	var lightChange = .004;
 
 	public function updateLight() {
-		light = [];
+		lightImage.g2.begin(true, kha.Color.Black);
 		for (x in 0...width) {
 			for (y in 0...height) {
-				light.push(getTile(x, y) == 0 ? 1 : 0);
-			}
-		}
-		var radius = lightRadius;
-		for (x in radius...width - radius * 2) {
-			for (y in radius...height - radius * 2) {
 				if (getTile(x, y) == 0) {
-					for (dx in -radius...radius) {
-						for (dy in -radius...radius) {
-							light[(x + dx) * height + y + dy] = Math.min(1,
-								light[(x + dx) * height + y + dy] + lightChange / Math.sqrt(dx * dx + dy * dy) * radius);
-						}
-					}
+					lightImage.g2.drawImage(kha.Assets.images.light, x - 8, y - 8);
 				}
 			}
 		}
+		lightImage.g2.end();
+		lightImage.generateMipmaps(1);
 	}
 
 	public function updateLightAroundPoint(x, y) {
-		var radius = lightRadius;
-		for (dx in -radius...radius) {
-			for (dy in -radius...radius) {
-				if (x + dx < 0 || y + dy < 0 || x + dx > width || y + dy > height)
-					continue;
-				light[(x + dx) * height + y + dy] = Math.min(1, light[(x + dx) * height + y + dy] + lightChange * radius / Math.sqrt(dx * dx + dy * dy));
-			}
+		lightImage.g2.begin(false);
+		if (getTile(x, y) == 0) {
+			lightImage.g2.drawImage(kha.Assets.images.light, x - 8, y - 8);
 		}
+		lightImage.g2.end();
 	}
 
 	public function worldPositionToTilePosition(worldPosition:Vector2) {
 		return new Vector2i(Math.floor(worldPosition.x / tileSize), Math.floor(worldPosition.y / tileSize));
 	}
 
-	public function update() {}
+	public function update() {
+		while (removedTiles.length > 0) {
+			var removedTile = removedTiles.pop();
+			var x = removedTile.x;
+			var y = removedTile.y;
+
+			if (x > 0 && unsafeGetTile(x - 1, y) != 0 && unsafeGetBody(x - 1, y) == null) {
+				makeBody(x - 1, y);
+			}
+			if (x < width - 1 && unsafeGetTile(x + 1, y) != 0 && unsafeGetBody(x + 1, y) == null) {
+				makeBody(x + 1, y);
+			}
+			if (y > 0 && unsafeGetTile(x, y - 1) != 0 && unsafeGetBody(x, y - 1) == null) {
+				makeBody(x, y - 1);
+			}
+			if (y < height - 1 && unsafeGetTile(x, y + 1) != 0 && unsafeGetBody(x, y + 1) == null) {
+				makeBody(x, y + 1);
+			}
+
+			// bodies[x * height + y].setShapeFilters(new InteractionFilter(0)); //Interesting possible optimisation avenue
+		}
+		// updateLight();
+	}
 
 	public function render(g:Graphics) {
 		g.mipmapScaleQuality = Low;
@@ -183,8 +223,6 @@ class Grid {
 					var removeBottomRight = rightEmpty && belowEmpty;
 					var variant = (removeTopLeft ? 1 << 0 : 0) | (removeTopRight ? 1 << 1 : 0) | (removeBottomRight ? 1 << 2 : 0) | (removeBottomLeft ? 1 << 3 : 0);
 
-					var light = getLight(x, y);
-					g.color = kha.Color.fromFloats(light, light, light);
 					drawTile(g, x, y, tile - 1, variant);
 				}
 			}
@@ -192,6 +230,9 @@ class Grid {
 		g.color = kha.Color.White;
 		g.mipmapScaleQuality = High;
 		g.imageScaleQuality = High;
+		g.pipeline = lightingPipeline;
+		g.drawScaledImage(lightImage, 0, 0, width * tileSize, height * tileSize);
+		g.pipeline = null;
 	}
 
 	public function drawTile(g:Graphics, x:Int, y:Int, tile:Int, variant:Int) {
@@ -200,11 +241,11 @@ class Grid {
 
 	function makeBody(x, y) {
 		var body = new Body(BodyType.STATIC);
-		body.userData.tile = {x: x, y: y};
+		body.userData.tile = new TileBodyData(x, y);
 
 		body.cbTypes.add(tileCallbackType);
 		body.shapes.add(new Polygon(Polygon.rect(x * tileSize, y * tileSize, tileSize, tileSize)));
-		body.setShapeFilters(new InteractionFilter(CollisionLayers.TILE));
+		body.setShapeFilters(tileShapeFilter);
 		body.space = space;
 
 		bodies[x * height + y] = body;
@@ -227,19 +268,11 @@ class Grid {
 		if (bodies[x * height + y] != null) {
 			bodies[x * height + y].space = null;
 			bodies[x * height + y] = null;
+			// bodies[x * height + y].setShapeFilters(new InteractionFilter(0)); // Interesting possible optimisation avenue
 		}
 
-		if (x > 0 && unsafeGetTile(x - 1, y) != 0 && unsafeGetBody(x - 1, y) == null) {
-			makeBody(x - 1, y);
-		}
-		if (x < width - 1 && unsafeGetTile(x + 1, y) != 0 && unsafeGetBody(x + 1, y) == null) {
-			makeBody(x + 1, y);
-		}
-		if (y > 0 && unsafeGetTile(x, y - 1) != 0 && unsafeGetBody(x, y - 1) == null) {
-			makeBody(x, y - 1);
-		}
-		if (y < height - 1 && unsafeGetTile(x, y + 1) != 0 && unsafeGetBody(x, y + 1) == null) {
-			makeBody(x, y + 1);
+		if (getTile(x - 1, y) != 0 || getTile(x + 1, y) != 0 || getTile(x, y - 1) != 0 || getTile(x, y + 1) != 0) {
+			removedTiles.push(new Vector2i(x, y));
 		}
 
 		updateLightAroundPoint(x, y);
@@ -274,5 +307,25 @@ class Grid {
 		if (x < 0 || y < 0 || x >= width || y >= height)
 			return 0.;
 		return light[x * height + y];
+	}
+
+	function createLightingPipeline() {
+		var pipeline = new PipelineState();
+		var structure = new VertexStructure();
+		structure.add("vertexPosition", VertexData.Float3);
+		structure.add("vertexUV", VertexData.Float2);
+		structure.add("vertexColor", VertexData.Float4);
+		pipeline.inputLayout = [structure];
+		pipeline.vertexShader = Shaders.painter_image_vert;
+		pipeline.fragmentShader = Shaders.painter_image_frag;
+
+		pipeline.blendSource = BlendingFactor.DestinationColor;
+		pipeline.blendDestination = BlendingFactor.BlendZero;
+
+		pipeline.alphaBlendSource = BlendingFactor.BlendOne;
+		pipeline.alphaBlendDestination = BlendingFactor.BlendZero;
+
+		pipeline.compile();
+		return pipeline;
 	}
 }

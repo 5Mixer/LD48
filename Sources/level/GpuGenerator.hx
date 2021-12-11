@@ -15,7 +15,6 @@ class GpuGenerator {
 	}
 
 	public function generate() {
-		// texture.g2.begin(true, kha.Color.Transparent);
 		Assets.images.noise.generateMipmaps(4);
 		var pipeline = createGenerationPipeline();
 		texture.g2.begin(true, kha.Color.fromBytes(3, 0, 0));
@@ -24,7 +23,6 @@ class GpuGenerator {
 		texture.g2.pipeline = pipeline;
 		texture.g2.drawScaledImage(kha.Assets.images.noise, 0, 0, Math.ceil(texture.width), Math.ceil(texture.height));
 		texture.g2.end();
-		// texture.g2.flush();
 		return texture.getPixels();
 	}
 
