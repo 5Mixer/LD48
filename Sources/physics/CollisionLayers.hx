@@ -8,4 +8,5 @@ class CollisionLayers {
 	public static final LEVEL = 1 << 4;
 	public static final DYNAMITE = 1 << 5;
 	public static final BULLET = 1 << 6;
+	public static final EXPLOSION_FORCE = 1 << 6;
 }

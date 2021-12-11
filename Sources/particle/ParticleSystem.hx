@@ -23,10 +23,10 @@ class ParticleSystem {
 		return newParticle;
 	}
 
-	public function explode(x, y, particleCount, vx, vy) {
-		for (i in 0...Math.round(particleCount / 7)) {
+	public function explode(x, y, particleCount, vx, vy, speed) {
+		for (i in 0...particleCount) {
 			var angle = Math.PI * 2 * Math.random();
-			var speed = 20 + Math.random() * 70;
+			var speed = 20 + Math.random() * 10 * speed;
 			var p = getParticle();
 			p.position.x = x;
 			p.position.y = y;
@@ -35,7 +35,7 @@ class ParticleSystem {
 			p.velocity.x = Math.cos(angle) * speed / p.size + vx;
 			p.velocity.y = Math.sin(angle) * speed / p.size + vy;
 			p.life = 0;
-			p.lifetime = .4 + Math.random() * .5;
+			p.lifetime = .2 + Math.random() * .4;
 		}
 	}
 
@@ -60,8 +60,8 @@ class ParticleSystem {
 			particle.position.x += particle.velocity.x;
 			particle.position.y += particle.velocity.y;
 
-			particle.velocity.x *= .9;
-			particle.velocity.y *= .9;
+			particle.velocity.x *= .95;
+			particle.velocity.y *= .95;
 
 			particle.life += delta;
 		}

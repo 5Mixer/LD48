@@ -1,5 +1,6 @@
 package level;
 
+import nape.geom.Vec2;
 import kha.graphics4.PipelineState;
 import kha.graphics4.BlendingFactor;
 import kha.Shaders;
@@ -49,6 +50,7 @@ class Grid {
 	public static var levelCallbackType = new CbType();
 
 	var tileShapeFilter = new InteractionFilter(CollisionLayers.TILE);
+	var nullShapeFilter = new InteractionFilter(0);
 
 	public static final tileSize = 20;
 
@@ -218,12 +220,23 @@ class Grid {
 		g.drawScaledSubImage(tileTextures.renderTexture, tile * 100, variant * 100, 100, 100, x * tileSize, y * tileSize, tileSize, tileSize);
 	}
 
+	var newBodyVertices:Array<Vec2> = [Vec2.get(), Vec2.get(), Vec2.get(), Vec2.get()];
+
 	function makeBody(x, y) {
 		var body = new Body(BodyType.STATIC);
 		body.userData.tile = new TileBodyData(x, y);
 
 		body.cbTypes.add(tileCallbackType);
-		body.shapes.add(new Polygon(Polygon.rect(x * tileSize, y * tileSize, tileSize, tileSize)));
+		newBodyVertices[0].x = x * tileSize;
+		newBodyVertices[0].y = y * tileSize;
+		newBodyVertices[1].x = x * tileSize + tileSize;
+		newBodyVertices[1].y = y * tileSize;
+		newBodyVertices[2].x = x * tileSize + tileSize;
+		newBodyVertices[2].y = y * tileSize + tileSize;
+		newBodyVertices[3].x = x * tileSize;
+		newBodyVertices[3].y = y * tileSize + tileSize;
+		// body.shapes.add(new Polygon(Polygon.rect(x * tileSize, y * tileSize, tileSize, tileSize)));
+		body.shapes.add(new Polygon(newBodyVertices));
 		body.setShapeFilters(tileShapeFilter);
 		body.space = space;
 
@@ -246,8 +259,9 @@ class Grid {
 
 		if (bodies[x * height + y] != null) {
 			// bodies[x * height + y].space = null;
-			// bodies[x * height + y] = null;
-			bodies[x * height + y].setShapeFilters(new InteractionFilter(0)); // Interesting possible optimisation avenue
+			// bodies[x * height + y].setShapeFilters(new InteractionFilter(0,)); // Interesting possible optimisation avenue
+			bodies[x * height + y].shapes.at(0).filter = nullShapeFilter;
+			bodies[x * height + y] = null;
 		}
 	}
 

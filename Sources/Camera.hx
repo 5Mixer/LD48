@@ -11,6 +11,9 @@ class Camera {
 	var zoomSpeed = 1.09;
 	var maximumVisibleX:Int;
 
+	var shakeVector = new Vector2();
+	var maximumShakeVectorLength = 100;
+
 	public function new(maximumVisibleX) {
 		position = new Vector2();
 		scale = 1;
@@ -40,19 +43,32 @@ class Camera {
 	}
 
 	public function worldToView(point:Vector2) {
-		return point.mult(scale).sub(position);
+		var fast = getTransformation().multvec(point.fast());
+		return new Vector2(fast.x, fast.y);
 	}
 
 	public function viewToWorld(point:Vector2) {
-		return point.add(position).mult(1 / scale);
+		var fast = getTransformation().inverse().multvec(point.fast());
+		return new Vector2(fast.x, fast.y);
 	}
 
 	public function getTransformation() {
-		return FastMatrix3.translation(-Math.round(position.x), -Math.round(position.y))
+		return FastMatrix3.translation(-Math.round(position.x + shakeVector.x), -Math.round(position.y + shakeVector.y))
 			.multmat(FastMatrix3.scale(Math.round(scale * 100) / 100, Math.round(scale * 100) / 100));
 	}
 
+	public function applyShake(vector:Vector2) {
+		shakeVector.x += vector.x;
+		shakeVector.y += vector.y;
+	}
+
 	public function transform(g:Graphics) {
+		shakeVector.length *= .97;
+		if (shakeVector.length != 0) {
+			if (shakeVector.length > maximumShakeVectorLength) {
+				shakeVector.length = maximumShakeVectorLength;
+			}
+		}
 		g.pushTransformation(getTransformation());
 	}
 

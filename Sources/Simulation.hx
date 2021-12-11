@@ -111,10 +111,10 @@ class Simulation {
 		var droppedItem = Tiles.data[tile - 1].drops;
 		inventory.addItem(droppedItem, 1);
 
-		// if (tile == 0 || Math.random() > .4)
-		// 	return;
+		if (tile == 0 || Math.random() > .1)
+			return;
 
-		// drops.push(new TileDrop((x + .5) * Grid.tileSize, (y + .5) * Grid.tileSize, tile, space));
+		drops.push(new TileDrop((x + .5) * Grid.tileSize, (y + .5) * Grid.tileSize, tile, space));
 	}
 
 	function createSpaceListeners() {
@@ -152,7 +152,7 @@ class Simulation {
 				bullet.body.space = null;
 				bullets.remove(bullet);
 
-				explosion(position, 30, velocity.x, velocity.y);
+				explosion(position, 15, velocity.x, velocity.y);
 			});
 	}
 
@@ -169,7 +169,7 @@ class Simulation {
 	}
 
 	function explosion(position:Vector2, force:Float, vx = 0., vy = 0.) {
-		explosions.explode(position.x, position.y, Math.round(10 * force), vx, vy);
+		explosions.explode(position.x, position.y, Math.round(force * 8), vx, vy, Math.round(force));
 
 		var forceSquared = force * force / 4;
 
@@ -193,7 +193,8 @@ class Simulation {
 		var explosionForceRadius = force * 20;
 
 		for (body in space.bodiesInCircle(napePosition, explosionForceRadius, false,
-			new InteractionFilter(1, CollisionLayers.DYNAMITE | CollisionLayers.PLAYER | CollisionLayers.TILE_DROP | CollisionLayers.ENEMY))) {
+			new InteractionFilter(1,
+				CollisionLayers.DYNAMITE | CollisionLayers.PLAYER | CollisionLayers.TILE_DROP | CollisionLayers.ENEMY | CollisionLayers.EXPLOSION_FORCE))) {
 			var deltaVector = body.position.sub(napePosition);
 			if (deltaVector.length == 0)
 				continue; // Same object - delta to object is zero, applying force is illogical
@@ -294,6 +295,8 @@ class Simulation {
 				angle += (-.5 + Math.random()) * variation;
 				vector = new Vector2(Math.cos(angle), Math.sin(angle));
 
+				camera.applyShake(vector.mult(-10));
+
 				var bullet = new Bullet(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space);
 				var speed = 4000 * (.9 + Math.random() * .2);
 				bullet.setVelocity(vector.x * speed, vector.y * speed);
@@ -350,6 +353,7 @@ class Simulation {
 		}
 
 		player.update(delta, input);
+		camera.applyShake(new Vector2(player.body.velocity.x, player.body.velocity.y).mult(.01));
 
 		var target = new Vector2(player.body.position.x, player.body.position.y);
 		for (spikey in spikeys) {
@@ -406,7 +410,7 @@ class Simulation {
 
 		if (input.shouldMove() && player.body.velocity.length > 1) {
 			var jetVector = turretVector.mult(-20 * (.8 + .4 * Math.random()));
-			explosions.explode(player.body.position.x, player.body.position.y, 10, jetVector.x, jetVector.y);
+			explosions.explode(player.body.position.x, player.body.position.y, 2, jetVector.x, jetVector.y, 1);
 		}
 
 		for (drop in drops) {
