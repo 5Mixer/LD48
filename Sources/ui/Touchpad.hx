@@ -1,5 +1,6 @@
 package ui;
 
+import kha.Assets;
 import kha.math.Vector2;
 import kha.input.Surface;
 import kha.graphics2.Graphics;
@@ -57,11 +58,11 @@ class Touchpad {
 	}
 
 	public function render(g:Graphics) {
-		g.color = kha.Color.fromFloats(1, 1, 1, .3);
-		g.fillCircle(screenPosition.x, screenPosition.y, radius);
+		g.color = kha.Color.White;
+		g.drawScaledImage(Assets.images.touchpad, screenPosition.x - radius, screenPosition.y - radius, radius * 2, radius * 2);
 
-		g.color = kha.Color.fromFloats(1, 1, 1, .3);
 		var touchPoint = screenPosition.add(new Vector2(Math.cos(angle) * length * radius, Math.sin(angle) * length * radius));
-		g.fillCircle(touchPoint.x, touchPoint.y, visualFingerRadius);
+		g.drawScaledImage(Assets.images.touchpad, touchPoint.x - visualFingerRadius, touchPoint.y - visualFingerRadius, visualFingerRadius * 2,
+			visualFingerRadius * 2);
 	}
 }

@@ -44,8 +44,6 @@ class Grid {
 	var bodies:Array<Body> = [];
 	var space:Space;
 
-	var removedTiles:Array<Vector2i> = []; // Reprocess removed tile bodies once on update(), as otherwise large removals cause many unneeded [create -> delete]
-
 	public static var tileCallbackType = new CbType();
 	public static var levelCallbackType = new CbType();
 

@@ -7,5 +7,6 @@ project.addLibrary('hxNoise');
 project.addAssets('Assets')
 
 project.addDefine("NAPE_RELEASE_BUILD")
+project.addDefine("no-debug")
 
 resolve(project);
