@@ -1,5 +1,6 @@
 package particle;
 
+import haxe.ds.Vector;
 import kha.Shaders;
 import kha.graphics4.PipelineState;
 import kha.graphics4.VertexStructure;
@@ -10,17 +11,28 @@ import kha.graphics2.Graphics;
 using kha.graphics2.GraphicsExtension;
 
 class ParticleSystem {
-	var particles:Array<Particle> = [];
+	var allocatedParticles = 4000;
+	var particles:Vector<Particle>;
 	var pipeline:PipelineState;
 
+	var particleAllocationIndex = 0;
+
 	public function new() {
+		particles = new Vector(allocatedParticles);
+
 		pipeline = createAdditivePipeline();
+		for (i in 0...allocatedParticles) {
+			particles[i] = new Particle();
+		}
 	}
 
 	function getParticle() {
-		var newParticle = new Particle();
-		particles.push(newParticle);
-		return newParticle;
+		particleAllocationIndex++;
+
+		if (particleAllocationIndex == allocatedParticles) {
+			particleAllocationIndex = 0;
+		}
+		return particles[particleAllocationIndex];
 	}
 
 	public function explode(x, y, particleCount, vx, vy, speed) {
@@ -54,7 +66,6 @@ class ParticleSystem {
 	public function update(delta:Float) {
 		for (particle in particles) {
 			if (particle.life > particle.lifetime) {
-				particles.remove(particle);
 				continue;
 			}
 			particle.position.x += particle.velocity.x;
@@ -70,8 +81,11 @@ class ParticleSystem {
 	public function render(g:Graphics) {
 		g.pipeline = pipeline;
 		for (particle in particles) {
+			if (particle.life > particle.lifetime) {
+				continue;
+			}
+
 			var life = particle.life / particle.lifetime;
-			// g.color = particle.gradient.at(Math.floor(life * 100), 0);
 			g.color = kha.Color.fromFloats(.9, .5, .1);
 			var size = particle.size * Math.abs(1.1 - life);
 			g.drawScaledImage(kha.Assets.images.explosion_particle, particle.position.x - size, particle.position.y - size, size * 2, size * 2);

@@ -257,7 +257,6 @@ class Grid {
 
 		if (bodies[x * height + y] != null) {
 			// bodies[x * height + y].space = null;
-			// bodies[x * height + y].setShapeFilters(new InteractionFilter(0,)); // Interesting possible optimisation avenue
 			bodies[x * height + y].shapes.at(0).filter = nullShapeFilter;
 			bodies[x * height + y] = null;
 		}
@@ -267,7 +266,7 @@ class Grid {
 		lightImage.g2.begin(false);
 		for (x in minX - 1...maxX + 1) {
 			for (y in minY - 1...maxY + 1) {
-				if (getTile(x, y) == 0) {
+				if (unsafeGetTile(x, y) == 0) {
 					lightImage.g2.drawImage(kha.Assets.images.light, x - 8, y - 8);
 				} else if (unsafeGetBody(x, y) == null
 					&& (getTile(x - 1, y) == 0 || getTile(x + 1, y) == 0 || getTile(x, y - 1) == 0 || getTile(x, y + 1) == 0)) {
@@ -289,7 +288,7 @@ class Grid {
 	public function constructShapes() {
 		for (x in 0...width) {
 			for (y in 0...height) {
-				if (getTile(x, y) != 0
+				if (unsafeGetTile(x, y) != 0
 					&& (getTile(x - 1, y) == 0 || getTile(x + 1, y) == 0 || getTile(x, y - 1) == 0 || getTile(x, y + 1) == 0)) {
 					makeBody(x, y);
 				}

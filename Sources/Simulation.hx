@@ -1,5 +1,6 @@
 package;
 
+import kha.Assets;
 import nape.geom.RayResult;
 import ui.Hotbar;
 import inventory.Inventory;
@@ -111,10 +112,10 @@ class Simulation {
 		var droppedItem = Tiles.data[tile - 1].drops;
 		inventory.addItem(droppedItem, 1);
 
-		if (tile == 0 || Math.random() > .1)
-			return;
+		// if (tile == 0 || Math.random() > .1)
+		// 	return;
 
-		drops.push(new TileDrop((x + .5) * Grid.tileSize, (y + .5) * Grid.tileSize, tile, space));
+		// drops.push(new TileDrop((x + .5) * Grid.tileSize, (y + .5) * Grid.tileSize, tile, space));
 	}
 
 	function createSpaceListeners() {
@@ -372,6 +373,13 @@ class Simulation {
 		g.color = kha.Color.White;
 
 		GraphicsHelper.drawImage(g, kha.Assets.images.background, 0, -594, Grid.width * Grid.tileSize, 594);
+		for (x in 0...Math.ceil(Grid.width * Grid.tileSize / Assets.images.underground_background.width)) {
+			for (y in 0...Math.ceil(Grid.height * Grid.tileSize / Assets.images.underground_background.height)) {
+				g.drawImage(Assets.images.underground_background, x * Assets.images.underground_background.width,
+					y * Assets.images.underground_background.height);
+			}
+		}
+
 		explosions.render(g);
 		grid.render(g);
 
