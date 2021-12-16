@@ -18,7 +18,34 @@
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
-     id="defs2" />
+     id="defs2">
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter1931"
+       x="-0.086391577"
+       y="-0.086391577"
+       width="1.1727832"
+       height="1.1727832">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.20971059"
+         id="feGaussianBlur1933" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter2243"
+       x="-0.030805849"
+       y="-0.030805849"
+       width="1.0616117"
+       height="1.0616117">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.09587034"
+         id="feGaussianBlur2245" />
+    </filter>
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -26,9 +53,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="6.7069387"
-     inkscape:cx="27.657924"
-     inkscape:cy="23.334044"
+     inkscape:zoom="23.73159"
+     inkscape:cx="24.208239"
+     inkscape:cy="18.224654"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -61,22 +88,25 @@
      id="layer1"
      transform="translate(-0.34951377,-0.51415038)">
     <circle
-       style="fill:#292b35;stroke-width:0.665001;stroke-linecap:round;paint-order:markers stroke fill;fill-opacity:1"
+       style="mix-blend-mode:normal;fill:#fff6d5;fill-opacity:1;stroke-width:0.722472;stroke-linecap:round;paint-order:markers stroke fill;filter:url(#filter2243)"
        id="path935"
        cx="4.0840125"
        cy="4.2486491"
-       r="3.7344987" />
+       r="3.7344987"
+       transform="matrix(0.92045253,0,0,0.92045253,0.32487283,0.33796925)" />
     <circle
-       style="fill:#4e4e50;fill-opacity:1;stroke-width:0.665001;stroke-linecap:round;paint-order:markers stroke fill"
+       style="mix-blend-mode:normal;fill:#fdffed;fill-opacity:1;stroke-width:0.722472;stroke-linecap:round;paint-order:markers stroke fill;filter:url(#filter1931)"
        id="circle1395"
-       cx="3.7877946"
-       cy="3.7946482"
-       r="2.912931" />
+       cx="4.0835342"
+       cy="4.1169138"
+       r="2.912931"
+       transform="matrix(0.92045253,0,0,0.92045253,0.32487283,0.33796925)" />
     <circle
-       style="fill:#d5d5db;fill-opacity:1;stroke-width:0.665004;stroke-linecap:round;paint-order:markers stroke fill"
-       id="circle1649"
-       cx="2.7406864"
-       cy="2.2328572"
-       r="0.59920907" />
+       style="mix-blend-mode:normal;fill:#fff9ed;fill-opacity:1;stroke-width:1.17302;stroke-linecap:round;paint-order:markers stroke fill;filter:url(#filter1931)"
+       id="circle1935"
+       cx="4.0835342"
+       cy="4.1169138"
+       r="2.912931"
+       transform="matrix(0.56691353,0,0,0.56691353,1.7685616,1.7934589)" />
   </g>
 </svg>

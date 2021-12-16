@@ -26,12 +26,12 @@ class GraphicsHelper {
 
 	public static function drawLaser(g:Graphics, x, y, angle, distance:Float) {
 		g.drawLine(x, y, x + Math.cos(angle) * distance, y + Math.sin(angle) * distance);
-		var width = 10;
+		var width = 300;
 
 		g.pushTransformation(g.transformation.multmat(FastMatrix3.translation(x, y))
 			.multmat(FastMatrix3.rotation(angle))
 			.multmat(FastMatrix3.translation(-x, -y)));
-		g.drawScaledImage(kha.Assets.images.laser, x, y - width / 2, distance, 10);
+		g.drawScaledImage(kha.Assets.images.laser, x, y - width / 2, distance, width);
 		g.popTransformation();
 	}
 }

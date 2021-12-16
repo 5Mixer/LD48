@@ -1,4 +1,4 @@
-package entity;
+package entity.projectile;
 
 import physics.CollisionLayers;
 import nape.dynamics.InteractionFilter;

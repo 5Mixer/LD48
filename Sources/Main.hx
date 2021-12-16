@@ -1,5 +1,10 @@
 package;
 
+import kha.graphics4.BlendingFactor;
+import kha.Shaders;
+import kha.graphics4.VertexData;
+import kha.graphics4.VertexStructure;
+import kha.graphics4.PipelineState;
 import kha.Window;
 import ui.Touchpad;
 import ui.Button;
@@ -26,6 +31,8 @@ class Main {
 	var movementTouchpad:Touchpad;
 	var actionTouchpad:Touchpad;
 
+	public static var additivePipeline:PipelineState;
+
 	function new() {
 		System.start({title: "Orbdig", width: 800, height: 600}, function(_) {
 			#if js
@@ -42,6 +49,8 @@ class Main {
 					kha.Assets.images.get(asset).generateMipmaps(8);
 				}
 
+				preparePipelines();
+
 				lastTime = Scheduler.time();
 
 				init();
@@ -53,6 +62,29 @@ class Main {
 				});
 			});
 		});
+	}
+
+	function preparePipelines() {
+		additivePipeline = createAdditivePipeline();
+	}
+
+	function createAdditivePipeline() {
+		var pipeline = new PipelineState();
+		var structure = new VertexStructure();
+		structure.add("vertexPosition", VertexData.Float3);
+		structure.add("vertexUV", VertexData.Float2);
+		structure.add("vertexColor", VertexData.Float4);
+		pipeline.inputLayout = [structure];
+		pipeline.vertexShader = Shaders.painter_image_vert;
+		pipeline.fragmentShader = Shaders.painter_image_frag;
+
+		pipeline.blendSource = BlendingFactor.SourceAlpha;
+		pipeline.blendDestination = BlendingFactor.BlendOne;
+		pipeline.alphaBlendSource = BlendingFactor.BlendOne;
+		pipeline.alphaBlendDestination = BlendingFactor.InverseSourceAlpha;
+
+		pipeline.compile();
+		return pipeline;
 	}
 
 	function init() {

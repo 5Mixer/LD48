@@ -1,4 +1,4 @@
-package entity;
+package entity.projectile;
 
 import nape.geom.Vec2;
 import physics.CollisionLayers;

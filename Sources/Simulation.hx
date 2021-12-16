@@ -1,13 +1,14 @@
 package;
 
+import entity.projectile.Pulse;
 import kha.Assets;
 import nape.geom.RayResult;
 import ui.Hotbar;
 import inventory.Inventory;
 import entity.Spikey;
 import level.Tiles;
-import entity.Dynamite;
-import entity.Bullet;
+import entity.projectile.Dynamite;
+import entity.projectile.Bullet;
 import physics.CollisionLayers;
 import entity.TileDrop;
 import entity.Player;
@@ -38,6 +39,7 @@ class Simulation {
 	var inventory:Inventory;
 
 	var dynamite:Array<Dynamite> = [];
+	var pulses:Array<Pulse> = [];
 	var drops:Array<TileDrop> = [];
 	var bullets:Array<Bullet> = [];
 
@@ -81,6 +83,7 @@ class Simulation {
 
 	public function initialise() {
 		dynamite = [];
+		pulses = [];
 		drops = [];
 		bullets = [];
 		explosions = new ParticleSystem();
@@ -120,7 +123,7 @@ class Simulation {
 
 	function createSpaceListeners() {
 		space.listeners.add(createBulletTileInteractionListener());
-		space.listeners.add(createPlayerTileDropInteractionListener());
+		space.listeners.add(createPulseTileInteractionListener());
 		space.listeners.add(createPlayerEnemyInteractionListener());
 	}
 
@@ -131,15 +134,6 @@ class Simulation {
 		walls.setShapeFilters(new InteractionFilter(CollisionLayers.LEVEL));
 		walls.cbTypes.add(Grid.levelCallbackType);
 		walls.space = space;
-	}
-
-	function createPlayerTileDropInteractionListener() {
-		return new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Player.callbackType, TileDrop.callbackType, function(callback:InteractionCallback) {
-			var drop:TileDrop = cast callback.int2.userData.drop;
-
-			drop.body.space = null;
-			drops.remove(drop);
-		});
 	}
 
 	function createBulletTileInteractionListener() {
@@ -157,6 +151,21 @@ class Simulation {
 			});
 	}
 
+	function createPulseTileInteractionListener() {
+		return new InteractionListener(CbEvent.BEGIN, InteractionType.ANY, Pulse.callbackType, [Grid.tileCallbackType, Spikey.callbackType],
+			function(callback:InteractionCallback) {
+				var pulse:Pulse = cast callback.int1.userData.pulse;
+
+				var position = new Vector2(pulse.body.position.x, pulse.body.position.y);
+				var velocity = pulse.body.velocity.copy().normalise().muleq(2);
+
+				pulse.body.space = null;
+				pulses.remove(pulse);
+
+				explosion(position, 10, velocity.x, velocity.y);
+			});
+	}
+
 	function createPlayerEnemyInteractionListener() {
 		return new InteractionListener(CbEvent.ONGOING, InteractionType.ANY, Player.callbackType, Spikey.callbackType, function(callback:InteractionCallback) {
 			if (callback.int2.userData.spikey == null)
@@ -170,7 +179,7 @@ class Simulation {
 	}
 
 	function explosion(position:Vector2, force:Float, vx = 0., vy = 0.) {
-		explosions.explode(position.x, position.y, Math.round(force * 8), vx, vy, Math.round(force));
+		explosions.explode(position.x, position.y, Math.round(force * 3), vx, vy, Math.round(force), Math.round(force / 4));
 
 		var forceSquared = force * force / 4;
 
@@ -282,6 +291,9 @@ class Simulation {
 		for (dynamite in dynamite) {
 			dynamite.update(delta);
 		}
+		for (pulse in pulses) {
+			pulse.update(delta);
+		}
 
 		if (input.shouldDoAction() && reload <= 0.) {
 			#if kha_android_native
@@ -293,15 +305,23 @@ class Simulation {
 
 			for (_ in 0...1) {
 				var variation = .1;
-				angle += (-.5 + Math.random()) * variation;
-				vector = new Vector2(Math.cos(angle), Math.sin(angle));
+				var offsetAngle = angle + (-.5 + Math.random()) * variation;
+				vector = new Vector2(Math.cos(offsetAngle), Math.sin(offsetAngle));
 
 				camera.applyShake(vector.mult(-10));
 
-				var bullet = new Bullet(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space);
+				// var bullet = new Bullet(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space);
+				// var speed = 4000 * (.9 + Math.random() * .2);
+				// bullet.setVelocity(vector.x * speed, vector.y * speed);
+				// bullets.push(bullet);
+
+				var variation = .005;
+				var offsetAngle = angle + (-.5 + Math.random()) * variation;
+				vector = new Vector2(Math.cos(offsetAngle), Math.sin(offsetAngle));
+				var pulse = new Pulse(player.body.position.x, player.body.position.y, space);
 				var speed = 4000 * (.9 + Math.random() * .2);
-				bullet.setVelocity(vector.x * speed, vector.y * speed);
-				bullets.push(bullet);
+				pulse.body.velocity.setxy(vector.x * speed, vector.y * speed);
+				pulses.push(pulse);
 			}
 
 			/*var d = new Dynamite(player.body.position.x + vector.x * 25, player.body.position.y + vector.y * 25, space, dynamiteExplosion);
@@ -313,7 +333,7 @@ class Simulation {
 			fireSound.volume = .3 + Math.random() * .1;
 
 			reload = 1.3 / dynamiteSpeed;
-			reload = .07;
+			reload = .07; // + Math.random() * .02;
 		}
 
 		#if kha_android_native
@@ -323,7 +343,8 @@ class Simulation {
 		#end
 		if (directionVector.length != 0) {
 			directionVector.normalise(); // So that rayHitPosition can be found easily later
-			var ray = space.rayCast(new Ray(player.body.position, directionVector), false, new InteractionFilter(1, ~CollisionLayers.TILE_DROP));
+			var ray = space.rayCast(new Ray(player.body.position, directionVector), false,
+				new InteractionFilter(1, CollisionLayers.TILE | CollisionLayers.DYNAMITE | CollisionLayers.ENEMY));
 			var rayHitPosition = null;
 
 			if (ray != null) {
@@ -335,7 +356,7 @@ class Simulation {
 
 					if (ray != null) {
 						if (ray.shape != null && ray.shape.body != null && ray.shape.body.userData != null) {
-							explosion(new Vector2(rayHitPosition.x, rayHitPosition.y), 3, ray.normal.x, ray.normal.y);
+							explosion(new Vector2(rayHitPosition.x, rayHitPosition.y), 8, ray.normal.x, ray.normal.y);
 
 							if (ray.shape.body.userData.tile != null) {
 								grid.damage(ray.shape.body.userData.tile.x, ray.shape.body.userData.tile.y, 1 + 2 * laserLevel);
@@ -384,6 +405,7 @@ class Simulation {
 		grid.render(g);
 
 		if (input.middle() && laserLevel > 0) {
+			g.pipeline = Main.additivePipeline;
 			#if kha_android_native
 			GraphicsHelper.drawLaser(g, player.body.position.x, player.body.position.y, Math.atan2(input.getActionVector().y, input.getActionVector().x),
 				rayDistance);
@@ -391,6 +413,7 @@ class Simulation {
 			GraphicsHelper.drawLaser(g, player.body.position.x, player.body.position.y,
 				Math.atan2(input.getMouseWorldPosition().y - player.body.position.y, input.getMouseWorldPosition().x - player.body.position.x), rayDistance);
 			#end
+			g.pipeline = null;
 		}
 
 		for (spikey in spikeys) {
@@ -418,7 +441,7 @@ class Simulation {
 
 		if (input.shouldMove() && player.body.velocity.length > 1) {
 			var jetVector = turretVector.mult(-20 * (.8 + .4 * Math.random()));
-			explosions.explode(player.body.position.x, player.body.position.y, 2, jetVector.x, jetVector.y, 1);
+			explosions.explode(player.body.position.x, player.body.position.y, 2, jetVector.x, jetVector.y, 1, 10);
 		}
 
 		for (drop in drops) {
@@ -427,6 +450,11 @@ class Simulation {
 		for (dynamite in dynamite) {
 			dynamite.render(g);
 		}
+		g.pipeline = Main.additivePipeline;
+		for (pulse in pulses) {
+			pulse.render(g);
+		}
+		g.pipeline = null;
 		for (bullet in bullets) {
 			bullet.render(g);
 		}
